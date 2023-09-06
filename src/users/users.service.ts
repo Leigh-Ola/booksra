@@ -33,7 +33,7 @@ export class UserService {
       select: ['id', 'password'],
     });
     if (userExists && userExists.password) {
-      throwBadRequest('This email address is already taken');
+      return throwBadRequest('This email address is already taken');
     }
     user = pick(user, [
       'firstName',
@@ -72,14 +72,15 @@ export class UserService {
       select: ['id', 'email', 'password', 'role'],
     });
     if (!userExists) {
-      throwBadRequest('This user does not exist');
+      return throwBadRequest('Invalid credentials');
     }
     if (!userExists.password) {
-      throwBadRequest('This user does not have an account');
+      return throwBadRequest('Invalid credentials');
+      // return throwBadRequest('This user does not have an account');
     }
     const isMatch = await bcrypt.compare(user.password, userExists.password);
     if (!isMatch) {
-      throwBadRequest('Invalid credentials');
+      return throwBadRequest('Invalid credentials');
     }
     const payload = {
       id: Number(userExists.id),
@@ -101,7 +102,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throwBadRequest('User does not exist');
+      return throwBadRequest('User does not exist');
     }
     return pick(user, [
       'firstName',
@@ -117,12 +118,15 @@ export class UserService {
   }
 
   async updateUser(id: number, user: Partial<User>): Promise<User> {
+    if (!id || isNaN(id)) {
+      return throwBadRequest('User ID is required');
+    }
     const userExists = await this.manager.findOne(User, {
       where: { id },
       select: ['id'],
     });
     if (!userExists) {
-      throwBadRequest('User does not exist');
+      return throwBadRequest('User does not exist');
     }
     user = pick(user, [
       'firstName',
@@ -135,6 +139,9 @@ export class UserService {
       'town',
       'state',
     ]) as Partial<User>;
+    if (!Object.keys(user).length) {
+      return;
+    }
     await this.userRepository.update(id, user);
     return;
   }
@@ -146,14 +153,14 @@ export class UserService {
       relations: ['passwordToken'],
     });
     if (!userExists || (userExists && userExists.id !== userId)) {
-      throwBadRequest('User does not exist');
+      return throwBadRequest('User does not exist');
     }
 
     // get node env
     const nodeEnv = process.env.NODE_ENV;
-    const token =
+    let token =
       nodeEnv === 'production' ? generateRandomNumberString(6) : '000000';
-    // const token = generateRandomNumberString(6);
+    token = await bcrypt.hash(token, 10);
     const passwordTokenEntry = userExists.passwordToken;
     if (passwordTokenEntry?.id) {
       await this.manager.update(ChangePassword, passwordTokenEntry.id, {
@@ -180,7 +187,7 @@ export class UserService {
     confirmPassword: string;
   }) {
     if (password !== confirmPassword) {
-      throwBadRequest('Passwords do not match');
+      return throwBadRequest('Passwords do not match');
     }
     const userExists = await this.manager.findOne(User, {
       where: { email },
@@ -188,14 +195,15 @@ export class UserService {
       relations: ['passwordToken'],
     });
     if (!userExists) {
-      throwBadRequest('User does not exist');
+      return throwBadRequest('User does not exist');
     }
     const passwordTokenEntry = userExists.passwordToken;
     if (!passwordTokenEntry?.token) {
-      throwBadRequest('Invalid token');
+      return throwBadRequest('Invalid token');
     }
-    if (passwordTokenEntry.token !== token) {
-      throwBadRequest('Incorrect token');
+    const isTokenMatch = await bcrypt.compare(passwordTokenEntry.token, token);
+    if (!isTokenMatch) {
+      return throwBadRequest('Incorrect token');
     }
     // check if token has expired
     const now = new Date();
@@ -206,7 +214,7 @@ export class UserService {
       : 15;
     tokenCreation.setMinutes(tokenCreation.getMinutes() + tokenExpiryMinutes); // token expires in 15 minutes
     if (now > tokenCreation) {
-      throwBadRequest('Token has expired');
+      return throwBadRequest('Token has expired');
     }
     await this.manager.update(
       User,

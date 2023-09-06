@@ -2,6 +2,7 @@ import { BookService } from './books.service';
 import {
   Post,
   Put,
+  Param,
   UseGuards,
   Body,
   Query,
@@ -9,7 +10,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { IsAdminUser } from '../users/users-guard';
-import { CreateBookDto } from './dto/books-dto';
+import { CreateBookDto, UpdateBookDto } from './dto/books-dto';
 import { BookCoversEnum } from '../utils/types';
 
 @Controller('book')
@@ -24,9 +25,9 @@ export class BookController {
   }
 
   // update book
-  @Put()
+  @Put(':id')
   @UseGuards(IsAdminUser)
-  async update(@Body() { id, data }: { id: number; data: CreateBookDto }) {
+  async update(@Param('id') id: number, @Body() data: UpdateBookDto) {
     return this.booksService.update(id, data);
   }
 

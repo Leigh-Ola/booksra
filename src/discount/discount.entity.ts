@@ -60,6 +60,7 @@ export class Discount {
   // books
   @OneToMany(() => Book, (book) => book.discount, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   books: Book[];
 }

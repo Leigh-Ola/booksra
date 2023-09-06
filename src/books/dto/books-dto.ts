@@ -8,7 +8,10 @@ import {
   MaxLength,
   IsEnum,
   IsUrl,
+  Max,
+  Min,
   MinLength,
+  Matches,
 } from 'class-validator';
 import { BookCoversEnum } from '../../utils/types';
 
@@ -43,8 +46,8 @@ export class CreateBookDto {
 
   // amountInStock
   @IsInt()
-  @MinLength(1)
-  @MaxLength(10)
+  @Min(0)
+  @Max(99999)
   amountInStock?: number;
 
   // price
@@ -52,8 +55,8 @@ export class CreateBookDto {
     maxDecimalPlaces: 2,
   })
   @IsNotEmpty()
-  @MinLength(1)
-  @MaxLength(10)
+  @Min(0)
+  @Max(9999999)
   price: number;
 
   // genre
@@ -72,8 +75,10 @@ export class CreateBookDto {
   // age range
   @IsOptional()
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @Matches(/^[0-9]+-[0-9]+$|^[0-9]+\+$/, {
+    message: 'Age range must be in the format of 0-0 or 0+',
+  })
+  @MaxLength(7)
   ageRange?: string;
 }
 
@@ -111,8 +116,8 @@ export class UpdateBookDto {
   // amountInStock
   @IsOptional()
   @IsInt()
-  @MinLength(1)
-  @MaxLength(10)
+  @Min(0)
+  @Max(99999)
   amountInStock?: number;
 
   // price
@@ -121,9 +126,9 @@ export class UpdateBookDto {
     maxDecimalPlaces: 2,
   })
   @IsNotEmpty()
-  @MinLength(1)
-  @MaxLength(10)
-  price?: number;
+  @Min(0)
+  @Max(9999999)
+  price: number;
 
   // genre
   @IsOptional()
@@ -141,7 +146,9 @@ export class UpdateBookDto {
   // age range
   @IsOptional()
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @Matches(/^[0-9]+-[0-9]+$|^[0-9]+\+$/, {
+    message: 'Age range must be in the format of 0-0 or 0+',
+  })
+  @MaxLength(7)
   ageRange?: string;
 }

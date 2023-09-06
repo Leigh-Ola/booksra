@@ -4,10 +4,12 @@ import {
   Post,
   Delete,
   Query,
+  Param,
   Body,
+  Put,
   UseGuards,
 } from '@nestjs/common';
-import { CreateDiscountDto } from './dto/discount-dto';
+import { CreateDiscountDto, UpdateDiscountDto } from './dto/discount-dto';
 import { DiscountService } from './discount.service';
 import { IsAdminUser } from '../users/users-guard';
 
@@ -22,6 +24,13 @@ export class DiscountController {
     return await this.discountService.create(discount);
   }
 
+  // update discount
+  @Put(':id')
+  @UseGuards(IsAdminUser)
+  async update(@Param('id') id: number, @Body() discount: UpdateDiscountDto) {
+    return await this.discountService.update(id, discount);
+  }
+
   // get matching discounts
   @Get()
   @UseGuards(IsAdminUser)
@@ -34,9 +43,9 @@ export class DiscountController {
   }
 
   // delete discount
-  @Delete()
+  @Delete(':id')
   @UseGuards(IsAdminUser)
-  async delete(@Body('id') id: number) {
+  async delete(@Param('id') id: number) {
     return await this.discountService.delete(id);
   }
 }

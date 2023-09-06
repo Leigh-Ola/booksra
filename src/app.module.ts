@@ -12,6 +12,9 @@ import { EntitiesModule } from './entities/entities.module';
 import { DiscountModule } from './discount/discount.module';
 import { ValidationError } from 'class-validator';
 import { first, has, isArray, isEmpty, values } from 'lodash';
+import { LocationService } from './location/location.service';
+import { LocationController } from './location/location.controller';
+import { LocationModule } from './location/location.module';
 
 const processClassValidatorErrors = (
   errors: ValidationError[],
@@ -71,8 +74,9 @@ const validator = new ValidationPipe({
     BookModule,
     EntitiesModule,
     DiscountModule,
+    LocationModule,
   ],
-  controllers: [AppController, EntityController],
+  controllers: [AppController, EntityController, LocationController],
   providers: [
     AppService,
     EntityService,
@@ -80,6 +84,7 @@ const validator = new ValidationPipe({
       provide: APP_PIPE,
       useValue: validator,
     },
+    LocationService,
   ],
 })
 export class AppModule {}

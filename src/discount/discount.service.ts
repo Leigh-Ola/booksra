@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ILike, In, EntityManager, DataSource } from 'typeorm';
 import { Discount } from './discount.entity';
 import { Book } from '../books/book.entity';
-import { CreateDiscountDto } from './dto/discount-dto';
+import { CreateDiscountDto, UpdateDiscountDto } from './dto/discount-dto';
 import { DiscountTypeEnum } from '../utils/types';
-import { pick } from 'lodash';
+import { pick, merge } from 'lodash';
 import { throwBadRequest } from '../utils/helpers';
 
 @Injectable()
@@ -35,19 +35,19 @@ export class DiscountService {
       discountDto.type === DiscountTypeEnum.PERCENTAGE &&
       (discountDto.value < 0 || discountDto.value > 100)
     ) {
-      throwBadRequest(
+      return throwBadRequest(
         'For percentage discounts, the value should be between 0 and 100',
       );
     }
     // if the discount is fixed, the value should be greater than 0
     if (discountDto.type === DiscountTypeEnum.FIXED && discountDto.value <= 0) {
-      throwBadRequest(
+      return throwBadRequest(
         'For fixed discounts, the value should be greater than 0',
       );
     }
     // if the end date has passed, throw an error
     if (await this.isDatePassed(new Date(discountDto.endDate), new Date())) {
-      throwBadRequest('The end date has passed');
+      return throwBadRequest('The end date has passed');
     }
     // if the coupon code already exists (exact match), throw an error
     if (discountDto.couponCode) {
@@ -57,7 +57,9 @@ export class DiscountService {
         },
       });
       if (existingDiscount) {
-        throwBadRequest('This coupon code already exists');
+        return throwBadRequest('This coupon code already exists');
+      } else {
+        discountDto.couponCode = String(discountDto.couponCode).toLowerCase();
       }
     }
     const discount = discountDto as CreateDiscountDto & {
@@ -78,7 +80,7 @@ export class DiscountService {
       relations: ['discount'],
     });
     if (foundBooks.length !== discountDto.bookIds.length) {
-      throwBadRequest(
+      return throwBadRequest(
         discount.bookIds.length -
           foundBooks.length +
           ' book(s) you selected were not found',
@@ -87,7 +89,7 @@ export class DiscountService {
     // if any of the books already have a discount, throw an error
     const booksWithDiscount = foundBooks.filter((book) => book.discount);
     if (booksWithDiscount.length) {
-      throwBadRequest(
+      return throwBadRequest(
         'Unable to proceed. The following books already have a discount: ' +
           booksWithDiscount.map((book) => book.code).join(', '),
       );
@@ -103,21 +105,123 @@ export class DiscountService {
     await this.updateBooks(discountDto.bookIds, createdDiscount);
   }
 
+  async update(id: number, discountDto: UpdateDiscountDto) {
+    if (!id || isNaN(id)) {
+      return throwBadRequest('Discount ID is required');
+    }
+    const discountExists = await this.manager.findOne(Discount, {
+      where: {
+        id,
+      },
+      select: ['id'],
+    });
+    if (!discountExists) {
+      return throwBadRequest('Discount not found');
+    }
+    // pick the required fields
+    discountDto = pick(discountDto, [
+      'name',
+      'couponCode',
+      'type',
+      'value',
+      'startDate',
+      'endDate',
+      'bookIds',
+    ]);
+    // if the discount is percentage, the value should be between 0 and 100
+    if (
+      discountDto.type === DiscountTypeEnum.PERCENTAGE &&
+      (discountDto.value < 0 || discountDto.value > 100)
+    ) {
+      return throwBadRequest(
+        'For percentage discounts, the value should be between 0 and 100',
+      );
+    }
+    // if the discount is fixed, the value should be greater than 0
+    if (discountDto.type === DiscountTypeEnum.FIXED && discountDto.value <= 0) {
+      return throwBadRequest(
+        'For fixed discounts, the value should be greater than 0',
+      );
+    }
+    // if the end date has passed, throw an error
+    if (await this.isDatePassed(new Date(discountDto.endDate), new Date())) {
+      return throwBadRequest('The end date has passed');
+    }
+    // if the coupon code already exists (exact match), throw an error
+    if (discountDto.couponCode) {
+      const discountWithSameCouponCode = await this.manager.findOne(Discount, {
+        where: {
+          couponCode: String(discountDto.couponCode).toLowerCase(),
+        },
+      });
+      if (discountWithSameCouponCode && discountWithSameCouponCode.id !== id) {
+        return throwBadRequest('This coupon code already exists');
+      } else {
+        discountDto.couponCode = String(discountDto.couponCode).toLowerCase();
+      }
+    }
+    const discount = discountDto as CreateDiscountDto & {
+      isActive: boolean;
+      books: Book[];
+    };
+    // if the start date has passed, set the isActive to true
+    if (await this.isDatePassed(new Date(discountDto.startDate), new Date())) {
+      discount.isActive = true;
+    } else {
+      discount.isActive = false;
+    }
+    // validate books
+    if (discountDto.bookIds?.length) {
+      const foundBooks = await this.manager.find(Book, {
+        where: {
+          id: In(discountDto.bookIds),
+        },
+        relations: ['discount'],
+      });
+      if (foundBooks.length !== discountDto.bookIds.length) {
+        return throwBadRequest(
+          discount.bookIds.length -
+            foundBooks.length +
+            ' book(s) you selected were not found',
+        );
+      }
+      // if any of the books already have another discount, throw an error
+      const booksWithDiscount = foundBooks.filter(
+        (book) => book.discount && book.discount.id !== id,
+      );
+      if (booksWithDiscount.length) {
+        return throwBadRequest(
+          'Unable to proceed. The following books already have another discount: ' +
+            booksWithDiscount.map((book) => book.code).join(', '),
+        );
+      }
+      discount.books = foundBooks;
+    }
+    // create discount
+    const updatedDiscount = merge(discountExists, discount);
+
+    await this.manager.save(updatedDiscount);
+    await this.updateBooks(discountDto.bookIds, updatedDiscount);
+  }
+
   // ensure books exist, and update their discounts
   private async updateBooks(
     bookIds: number[],
     discount: { id: number; value: number; type: DiscountTypeEnum },
   ) {
+    if (!bookIds?.length) {
+      return;
+    }
     // update books
     const bookIdsStr = bookIds.join(', ');
-    const discountExpression =
+    const discountValueExpression =
       discount.type === DiscountTypeEnum.PERCENTAGE
         ? `GREATEST(price - (price * ${discount.value} / 100), 0)`
         : `GREATEST(price - ${discount.value}, 0)`;
 
     await this.manager.query(`
         UPDATE "book"
-        SET "discountId" = ${discount.id}, "discountPrice" = ${discountExpression}
+        SET "discountId" = ${discount.id}, "discountPrice" = ${discountValueExpression}
         WHERE "id" IN (${bookIdsStr})
       `);
   }
@@ -171,14 +275,15 @@ export class DiscountService {
       },
     });
     if (!discount) {
-      throwBadRequest('Discount not found');
+      return throwBadRequest('Discount not found');
     }
-    await this.manager.delete(Discount, id);
     // update books
     await this.manager.update(
       Book,
       { discountId: id },
       { discountId: null, discountPrice: null },
     );
+    // delete discount
+    await this.manager.delete(Discount, id);
   }
 }

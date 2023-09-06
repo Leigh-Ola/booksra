@@ -7,7 +7,6 @@ import {
   IsInt,
   MaxLength,
   IsEnum,
-  IsDate,
   IsDateString,
 } from 'class-validator';
 import { DiscountTypeEnum } from '../../utils/types';
@@ -42,4 +41,42 @@ export class CreateDiscountDto {
   @IsArray()
   @IsInt({ each: true })
   bookIds: number[];
+}
+
+export class UpdateDiscountDto {
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(30)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  couponCode?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(DiscountTypeEnum)
+  type?: DiscountTypeEnum;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  value?: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsDateString()
+  startDate?: Date;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsDateString()
+  endDate?: Date;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  bookIds?: number[];
 }

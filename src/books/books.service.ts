@@ -33,7 +33,7 @@ export class BookService {
   // function to create a book
   async create(book: CreateBookDto) {
     if (!book.code || !book.imageUrl || !book.price || !book.amountInStock) {
-      throwBadRequest(
+      return throwBadRequest(
         'Book code, image, price and amount in stock are required',
       );
     }
@@ -43,7 +43,7 @@ export class BookService {
       select: ['id'],
     });
     if (bookWithCodeExists) {
-      throwBadRequest('Book code already exists');
+      return throwBadRequest('Book code already exists');
     }
     const bookPartial = pick(book, [
       'title',
@@ -61,14 +61,14 @@ export class BookService {
     if (!isNaN(amountInStock) && amountInStock >= 0) {
       bookPartial.amountInStock = amountInStock;
     } else {
-      throwBadRequest('Invalid amount in stock');
+      return throwBadRequest('Invalid amount in stock');
     }
     // validate price
     const price = Number(book.price);
     if (!isNaN(price) && price >= 0) {
       bookPartial.price = price;
     } else {
-      throwBadRequest('Invalid price');
+      return throwBadRequest('Invalid price');
     }
     // first create the age range if it was provided
     if (book.ageRange) {
@@ -133,7 +133,6 @@ export class BookService {
     const newBook = this.bookRepository.create(bookPartial);
     newBook.genres = genreEntities;
     await this.manager.save(newBook);
-    return newBook;
   }
 
   private async calculateNewDiscountPrice(
@@ -172,21 +171,26 @@ export class BookService {
 
   // update book
   async update(id: number, book: UpdateBookDto) {
+    if (!id || isNaN(id)) {
+      return throwBadRequest('Book ID is required');
+    }
     // make sure the book exists
     const bookExists = await this.manager.findOne(Book, {
       where: { id },
       select: ['id'],
     });
     if (!bookExists) {
-      throwBadRequest('Book not found');
+      return throwBadRequest('Book not found');
     }
-    // make sure another book with the same code doesn't exist
-    const bookWithCodeExists = await this.manager.findOne(Book, {
-      where: { code: book.code },
-      select: ['id'],
-    });
-    if (bookWithCodeExists) {
-      throwBadRequest('Book code already exists');
+    if (book.code) {
+      // make sure another book with the same code doesn't exist
+      const bookWithCodeExists = await this.manager.findOne(Book, {
+        where: { code: book.code },
+        select: ['id'],
+      });
+      if (bookWithCodeExists && bookWithCodeExists.id !== id) {
+        return throwBadRequest('Book code already exists');
+      }
     }
     const bookPartial = pick(book, [
       'title',
@@ -205,7 +209,7 @@ export class BookService {
       if (!isNaN(amountInStock) && amountInStock >= 0) {
         bookPartial.amountInStock = amountInStock;
       } else {
-        throwBadRequest('Invalid amount in stock');
+        return throwBadRequest('Invalid amount in stock');
       }
     }
     // validate price if it was provided
@@ -217,7 +221,7 @@ export class BookService {
           bookExists.discountId,
         );
       } else {
-        throwBadRequest('Invalid price');
+        return throwBadRequest('Invalid price');
       }
     }
     // first create the age range if it was provided
@@ -284,7 +288,6 @@ export class BookService {
     updatedBook.genres = genreEntities;
 
     await this.manager.save(updatedBook);
-    return updatedBook;
   }
 
   // function to get a book by title, code, category or age range
@@ -310,44 +313,79 @@ export class BookService {
     limit = Number(limit) || 10;
     page = page < 1 ? 1 : page;
     limit = limit < 1 ? 1 : limit > 100 ? 100 : limit;
-    const whereClause = {
-      ...(title && { title: ILike(`%${title}%`) }),
-      ...(code && { code: code }),
-      ...(category && { category: { name: category } }),
-      ...(ageRange && { ageRange: { name: ageRange } }),
-      ...(genre && { genres: { name: genre } }),
-      ...(cover && { cover: cover }),
-    };
-    const books = await this.manager.find(Book, {
-      where: whereClause,
-      relations: ['category', 'ageRange', 'genres', 'discount'],
-      select: {
-        id: true,
-        title: true,
-        code: true,
-        description: true,
-        cover: true,
-        amountInStock: true,
-        discountPrice: true,
-        price: true,
-        imageUrl: true,
-        createdAt: true,
-        category: {
-          name: true,
-        },
-        ageRange: {
-          name: true,
-        },
-        genres: {
-          name: true,
-        },
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-    return books;
+    const queryBuilder = await this.manager
+      .createQueryBuilder(Book, 'book')
+      .select([
+        'book.id',
+        'book.title',
+        'book.code',
+        'book.description',
+        'book.cover',
+        'book.amountInStock',
+        'book.discountPrice',
+        'book.price',
+        'book.imageUrl',
+        'book.createdAt',
+      ])
+      .leftJoinAndSelect('book.category', 'category')
+      .leftJoinAndSelect('book.ageRange', 'ageRange')
+      .leftJoinAndSelect('book.genres', 'genre')
+      .leftJoinAndSelect('book.discount', 'discount')
+      .orderBy('book.createdAt', 'DESC')
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    if (title) {
+      queryBuilder.andWhere('book.title ILike :title', { title: `%${title}%` });
+    }
+
+    if (code) {
+      queryBuilder.andWhere('book.code = :code', { code });
+    }
+
+    if (category) {
+      queryBuilder.andWhere('category.name = :category', { category });
+    }
+
+    if (ageRange) {
+      queryBuilder.andWhere('ageRange.name = :ageRange', { ageRange });
+    }
+
+    if (genre) {
+      queryBuilder.andWhere('genres.name = :genre', { genre });
+    }
+
+    if (cover) {
+      queryBuilder.andWhere('book.cover = :cover', { cover });
+    }
+
+    const books = await queryBuilder.getMany();
+    const response = [];
+    for await (const book of books) {
+      response.push({
+        id: book.id,
+        title: book.title,
+        code: book.code,
+        description: book.description,
+        cover: book.cover,
+        amountInStock: book.amountInStock,
+        discountPrice: book.discountPrice,
+        price: book.price,
+        imageUrl: book.imageUrl,
+        createdAt: book.createdAt,
+        category: book.category?.name || null,
+        ageRange: book.ageRange?.name || null,
+        genres: book.genres?.map((genre) => genre.name) || [],
+        discount:
+          (book.discount && {
+            name: book.discount?.name || null,
+            type: book.discount?.type || null,
+            value: book.discount?.value || null,
+            isActive: book.discount?.isActive || null,
+          }) ||
+          null,
+      });
+    }
+    return response;
   }
 }
