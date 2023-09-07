@@ -12,6 +12,9 @@ if (!isMainThread) {
 
 const dataSource = new DataSource(dataSourceConfig);
 
+console.log('dataSourceConfig', dataSourceConfig);
+console.log('dataSource', dataSource);
+
 let pool: Pool | undefined = undefined;
 export const getPool = async () => {
   const poolRef: Pool = await waitUntil(

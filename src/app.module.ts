@@ -61,14 +61,24 @@ const validator = new ValidationPipe({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+      //
+      type: process.env.DB_TYPE as any,
+      // if DATABASE_URL is available, then use the it and disable ssl
+      ...(process.env.DATABASE_URL && {
+        url: process.env.DATABASE_URL, // if this is provided,
+        ssl: false,
+        extra: { ssl: { rejectUnauthorized: false } },
+      }),
+      // else, use the host, port, username, password, database
+      ...(!process.env.DATABASE_URL && {
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT),
+        username: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+      }),
     }),
     UserModule,
     BookModule,

@@ -12,12 +12,14 @@ type TypeOrmDataSourceOptions = DataSourceOptions & {
 // const databaseConfig = processDatabaseConfig();
 const databaseConfig = getAppConfig().DB;
 if (databaseConfig.url) {
+  console.error('Connecting to db with url..');
   unset(databaseConfig, 'host');
   unset(databaseConfig, 'port');
   unset(databaseConfig, 'username');
   unset(databaseConfig, 'password');
   unset(databaseConfig, 'database');
 } else {
+  console.error('Connecting to db with host and port..');
   unset(databaseConfig, 'url');
 }
 
@@ -27,7 +29,7 @@ const defaultDataSourceOptions: TypeOrmDataSourceOptions = {
   type: 'postgres',
   ...omit(databaseConfig, ['maxPoolConnCount']),
   synchronize: false,
-  logging: ['error', 'warn', 'log'],
+  logging: ['error', 'warn', 'log', 'info'],
   logger: 'file',
   entities: ['./src/**/*.entity.{js,ts}'],
   migrations: [pathFromSrc('config/database/migrations/**/*.{js,ts}')],
