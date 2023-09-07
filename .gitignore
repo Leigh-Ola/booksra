@@ -1,6 +1,4 @@
 # compiled output
-/dist
-/misc
 /node_modules
 .env
 # Logs

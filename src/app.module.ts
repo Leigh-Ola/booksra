@@ -67,9 +67,9 @@ const validator = new ValidationPipe({
       type: process.env.DB_TYPE as any,
       // if DATABASE_URL is available, then use the it and disable ssl
       ...(process.env.DATABASE_URL && {
-        url: process.env.DATABASE_URL, // if this is provided,
-        ssl: false,
-        extra: { ssl: { rejectUnauthorized: false } },
+        url: process.env.DATABASE_URL,
+        // ssl: false, // this is required when using NEON
+        // extra: { ssl: { rejectUnauthorized: false } }, // this is required when using NEON
       }),
       // else, use the host, port, username, password, database
       ...(!process.env.DATABASE_URL && {
