@@ -27,4 +27,7 @@ SUPABASE:
 - Connection Help here: https://supabase.com/docs/guides/database/connecting-to-postgres
 - Pricing and limits here: https://supabase.com/pricing
 - NOTES: 500mb size, no point-in-time recovery, 5gb bandwidth/month, 1gb file storage (max 50mb/file)
+___
+RENDER.COM:
+- Backend Nodejs hosting
 ________________________

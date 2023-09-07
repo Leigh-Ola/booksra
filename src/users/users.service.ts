@@ -4,7 +4,9 @@ import { Repository, DataSource, EntityManager } from 'typeorm';
 import { User } from './user.entity';
 // import lodash function
 import { omit, pick } from 'lodash';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
+// import * as simplecrypt from 'simplecrypt';
+import * as bcrypt from 'bcrypt-node';
 import { JwtService } from '@nestjs/jwt';
 import { throwBadRequest, generateRandomNumberString } from '../utils/helpers';
 import { ChangePassword } from './change-password.entity';
@@ -48,7 +50,7 @@ export class UserService {
       'password',
     ]) as Partial<User>;
     if (typeof user.password === 'string' && user.password.length > 0) {
-      user.password = await bcrypt.hash(user.password, 10);
+      user.password = bcrypt.hashSync(user.password);
     } else {
       user.password = null;
     }
@@ -78,7 +80,11 @@ export class UserService {
       return throwBadRequest('Invalid credentials');
       // return throwBadRequest('This user does not have an account');
     }
-    const isMatch = await bcrypt.compare(user.password, userExists.password);
+    // const isMatch = await bcrypt.compareSync(user.password, userExists.password);
+    const isMatch = await bcrypt.compareSync(
+      user.password,
+      userExists.password,
+    );
     if (!isMatch) {
       return throwBadRequest('Invalid credentials');
     }
@@ -157,10 +163,10 @@ export class UserService {
     }
 
     // get node env
-    const nodeEnv = process.env.NODE_ENV;
-    let token =
-      nodeEnv === 'production' ? generateRandomNumberString(6) : '000000';
-    token = await bcrypt.hash(token, 10);
+    let token = generateRandomNumberString(6);
+    // nodeEnv === 'production' ? generateRandomNumberString(6) : '000000';
+    // token = await bcrypt.hash(token, 10);
+    token = bcrypt.hashSync(token);
     const passwordTokenEntry = userExists.passwordToken;
     if (passwordTokenEntry?.id) {
       await this.manager.update(ChangePassword, passwordTokenEntry.id, {
@@ -201,7 +207,11 @@ export class UserService {
     if (!passwordTokenEntry?.token) {
       return throwBadRequest('Invalid token');
     }
-    const isTokenMatch = await bcrypt.compare(passwordTokenEntry.token, token);
+    // const isTokenMatch = await bcrypt.compareSync(passwordTokenEntry.token, token);
+    const isTokenMatch = await bcrypt.compareSync(
+      passwordTokenEntry.token,
+      token,
+    );
     if (!isTokenMatch) {
       return throwBadRequest('Incorrect token');
     }
@@ -222,7 +232,8 @@ export class UserService {
         id: userExists.id,
       },
       {
-        password: await bcrypt.hash(password, 10),
+        // password: await bcrypt.hash(password, 10),
+        password: bcrypt.hashSync(password),
       },
     );
     // delete the password token
