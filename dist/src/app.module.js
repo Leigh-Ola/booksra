@@ -63,6 +63,8 @@ exports.AppModule = AppModule = __decorate([
                 type: process.env.DB_TYPE,
                 ...(process.env.DATABASE_URL && {
                     url: process.env.DATABASE_URL,
+                    ssl: false,
+                    extra: { ssl: { rejectUnauthorized: false } },
                 }),
                 ...(!process.env.DATABASE_URL && {
                     host: process.env.DB_HOST,
