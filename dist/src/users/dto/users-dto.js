@@ -43,10 +43,12 @@ __decorate([
     (0, class_validator_1.MaxLength)(30),
     (0, class_validator_1.IsStrongPassword)({
         minLength: 6,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
+        minLowercase: 0,
+        minUppercase: 0,
+        minNumbers: 0,
         minSymbols: 0,
+    }, {
+        message: 'Your password needs to be at least six digits long',
     }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
@@ -201,10 +203,12 @@ __decorate([
     (0, class_validator_1.MaxLength)(255),
     (0, class_validator_1.IsStrongPassword)({
         minLength: 6,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
+        minLowercase: 0,
+        minUppercase: 0,
+        minNumbers: 0,
         minSymbols: 0,
+    }, {
+        message: 'Your password needs to be at least six digits long',
     }),
     __metadata("design:type", String)
 ], UserResetPasswordDto.prototype, "password", void 0);

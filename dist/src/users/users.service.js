@@ -36,10 +36,10 @@ let UserService = class UserService {
     }
     async create(user) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email: user.email },
-            select: ['id', 'password'],
+            where: { email: user.email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            select: ['id'],
         });
-        if (userExists && userExists.password) {
+        if (userExists) {
             return (0, helpers_1.throwBadRequest)('This email address is already taken');
         }
         user = (0, lodash_1.pick)(user, [
@@ -73,8 +73,8 @@ let UserService = class UserService {
     }
     async login(user) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email: user.email },
-            select: ['id', 'email', 'password', 'role'],
+            where: { email: user.email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            select: ['id'],
         });
         if (!userExists) {
             return (0, helpers_1.throwBadRequest)('Invalid credentials');
@@ -150,7 +150,7 @@ let UserService = class UserService {
     }
     async sendPasswordToken(email, userId) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email },
+            where: { email: email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
             select: ['id', 'email'],
             relations: ['passwordToken'],
         });

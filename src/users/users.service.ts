@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager } from 'typeorm';
+import { Repository, DataSource, EntityManager, Not, IsNull } from 'typeorm';
 import { User } from './user.entity';
 // import lodash function
 import { omit, pick } from 'lodash';
@@ -30,11 +30,12 @@ export class UserService {
   }
 
   async create(user: Partial<User>) {
+    // if the user exists (matched name, with non-null password), return error
     const userExists = await this.manager.findOne(User, {
-      where: { email: user.email },
-      select: ['id', 'password'],
+      where: { email: user.email, password: Not(IsNull()) },
+      select: ['id'],
     });
-    if (userExists && userExists.password) {
+    if (userExists) {
       return throwBadRequest('This email address is already taken');
     }
     user = pick(user, [
@@ -70,8 +71,8 @@ export class UserService {
 
   async login(user: Partial<User>) {
     const userExists = await this.manager.findOne(User, {
-      where: { email: user.email },
-      select: ['id', 'email', 'password', 'role'],
+      where: { email: user.email, password: Not(IsNull()) },
+      select: ['id'],
     });
     if (!userExists) {
       return throwBadRequest('Invalid credentials');
@@ -154,7 +155,7 @@ export class UserService {
 
   async sendPasswordToken(email: string, userId: number) {
     const userExists = await this.manager.findOne(User, {
-      where: { email },
+      where: { email: email, password: Not(IsNull()) },
       select: ['id', 'email'],
       relations: ['passwordToken'],
     });

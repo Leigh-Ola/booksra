@@ -34,13 +34,18 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @MaxLength(30)
-  @IsStrongPassword({
-    minLength: 6,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 1,
-    minSymbols: 0,
-  })
+  @IsStrongPassword(
+    {
+      minLength: 6,
+      minLowercase: 0,
+      minUppercase: 0,
+      minNumbers: 0,
+      minSymbols: 0,
+    },
+    {
+      message: 'Your password needs to be at least six digits long',
+    },
+  )
   password: string;
 
   @IsOptional()
@@ -167,13 +172,18 @@ export class UserResetPasswordDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(255)
-  @IsStrongPassword({
-    minLength: 6,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 1,
-    minSymbols: 0,
-  })
+  @IsStrongPassword(
+    {
+      minLength: 6,
+      minLowercase: 0,
+      minUppercase: 0,
+      minNumbers: 0,
+      minSymbols: 0,
+    },
+    {
+      message: 'Your password needs to be at least six digits long',
+    },
+  )
   password: string;
 
   @IsString()
