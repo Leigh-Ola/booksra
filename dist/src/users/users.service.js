@@ -74,7 +74,7 @@ let UserService = class UserService {
     async login(user) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
             where: { email: user.email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
-            select: ['id'],
+            select: ['id', 'password', 'email', 'role'],
         });
         if (!userExists) {
             return (0, helpers_1.throwBadRequest)('Invalid credentials');

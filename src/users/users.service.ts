@@ -72,7 +72,7 @@ export class UserService {
   async login(user: Partial<User>) {
     const userExists = await this.manager.findOne(User, {
       where: { email: user.email, password: Not(IsNull()) },
-      select: ['id'],
+      select: ['id', 'password', 'email', 'role'],
     });
     if (!userExists) {
       return throwBadRequest('Invalid credentials');
