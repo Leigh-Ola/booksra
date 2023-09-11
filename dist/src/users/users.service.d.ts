@@ -19,7 +19,7 @@ export declare class UserService {
         email?: string;
     }): Promise<Partial<User>>;
     updateUser(id: number, user: Partial<User>): Promise<User>;
-    sendPasswordToken(email: string, userId: number): Promise<never>;
+    sendPasswordToken(email: string): Promise<never>;
     resetPassword({ email, token, password, confirmPassword, }: {
         email: string;
         token: string;

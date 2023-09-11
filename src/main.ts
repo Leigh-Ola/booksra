@@ -6,6 +6,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import getAppConfig from './config/envs';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+// import my mailer
+import { sendMail } from '../src/utils/mailer';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -14,6 +16,8 @@ async function bootstrap() {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
     bufferLogs: true,
   });
+
+  sendMail();
 
   const appConfig = getAppConfig();
   app.useGlobalInterceptors(new LoggerErrorInterceptor());

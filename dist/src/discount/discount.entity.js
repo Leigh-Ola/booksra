@@ -33,6 +33,18 @@ __decorate([
     __metadata("design:type", String)
 ], Discount.prototype, "type", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: types_1.DiscountCategoryEnum, nullable: true }),
+    __metadata("design:type", String)
+], Discount.prototype, "category", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: types_1.CouponTypeEnum, nullable: true }),
+    __metadata("design:type", String)
+], Discount.prototype, "couponType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'numeric', nullable: true, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], Discount.prototype, "couponMinValue", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'numeric', nullable: false, precision: 10, scale: 2 }),
     __metadata("design:type", Number)
 ], Discount.prototype, "value", void 0);

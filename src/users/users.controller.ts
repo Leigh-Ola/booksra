@@ -58,8 +58,8 @@ export class UserController {
 
   // change password
   @Put('/begin-change-password')
-  async sendPasswordToken(@Body() body: UserChangePasswordDto, @Request() req) {
-    return this.usersService.sendPasswordToken(body.email, req.user.id);
+  async sendPasswordToken(@Body() body: UserChangePasswordDto) {
+    return this.usersService.sendPasswordToken(body.email);
   }
 
   // reset password

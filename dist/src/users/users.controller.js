@@ -41,8 +41,8 @@ let UserController = class UserController {
     async login(user) {
         return this.usersService.login(user);
     }
-    async sendPasswordToken(body, req) {
-        return this.usersService.sendPasswordToken(body.email, req.user.id);
+    async sendPasswordToken(body) {
+        return this.usersService.sendPasswordToken(body.email);
     }
     async resetPassword(body) {
         return this.usersService.resetPassword(body);
@@ -83,9 +83,8 @@ __decorate([
 __decorate([
     (0, common_1.Put)('/begin-change-password'),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [users_dto_1.UserChangePasswordDto, Object]),
+    __metadata("design:paramtypes", [users_dto_1.UserChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sendPasswordToken", null);
 __decorate([

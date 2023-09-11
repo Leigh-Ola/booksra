@@ -12,6 +12,6 @@ export declare class UserController {
     login(user: LoginUserDto): Promise<{
         token: string;
     }>;
-    sendPasswordToken(body: UserChangePasswordDto, req: any): Promise<never>;
+    sendPasswordToken(body: UserChangePasswordDto): Promise<never>;
     resetPassword(body: UserResetPasswordDto): Promise<never>;
 }

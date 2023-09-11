@@ -22,6 +22,8 @@ const bcrypt = require("bcrypt-node");
 const jwt_1 = require("@nestjs/jwt");
 const helpers_1 = require("../utils/helpers");
 const change_password_entity_1 = require("./change-password.entity");
+const forgot_password_1 = require("../mail/templates/forgot-password");
+const mail_service_1 = require("../mail/mail.service");
 let UserService = class UserService {
     constructor(userRepository, dbSource, jwtService) {
         this.userRepository = userRepository;
@@ -148,26 +150,34 @@ let UserService = class UserService {
         await this.userRepository.update(id, user);
         return;
     }
-    async sendPasswordToken(email, userId) {
+    async sendPasswordToken(email) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
             where: { email: email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
             select: ['id', 'email'],
             relations: ['passwordToken'],
         });
-        if (!userExists || (userExists && userExists.id !== userId)) {
+        if (!userExists) {
             return (0, helpers_1.throwBadRequest)('User does not exist');
         }
-        let token = (0, helpers_1.generateRandomNumberString)(6);
-        token = bcrypt.hashSync(token);
+        const token = (0, helpers_1.generateRandomNumberString)(6);
+        const encryptedToken = bcrypt.hashSync(token);
         const passwordTokenEntry = userExists.passwordToken;
+        const template = (0, forgot_password_1.forgotPasswordTemplate)({
+            recipient: userExists.email,
+            subject: 'Password Reset',
+            data: {
+                token,
+            },
+        });
+        await (0, mail_service_1.sendMail)(template);
         if (passwordTokenEntry?.id) {
             await this.manager.update(change_password_entity_1.ChangePassword, passwordTokenEntry.id, {
-                token,
+                token: encryptedToken,
             });
         }
         else {
             await this.manager.save(change_password_entity_1.ChangePassword, {
-                token,
+                token: encryptedToken,
                 userId: userExists.id,
             });
         }
@@ -188,7 +198,7 @@ let UserService = class UserService {
         if (!passwordTokenEntry?.token) {
             return (0, helpers_1.throwBadRequest)('Invalid token');
         }
-        const isTokenMatch = await bcrypt.compareSync(passwordTokenEntry.token, token);
+        const isTokenMatch = await bcrypt.compareSync(token, passwordTokenEntry.token);
         if (!isTokenMatch) {
             return (0, helpers_1.throwBadRequest)('Incorrect token');
         }

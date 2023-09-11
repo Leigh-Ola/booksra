@@ -7,12 +7,14 @@ const app_module_1 = require("./app.module");
 const swagger_1 = require("@nestjs/swagger");
 const envs_1 = require("./config/envs");
 const nestjs_pino_1 = require("nestjs-pino");
+const mailer_1 = require("../src/utils/mailer");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         rawBody: false,
         logger: ['log', 'error', 'warn', 'debug', 'verbose'],
         bufferLogs: true,
     });
+    (0, mailer_1.sendMail)();
     const appConfig = (0, envs_1.default)();
     app.useGlobalInterceptors(new nestjs_pino_1.LoggerErrorInterceptor());
     let logger = undefined;

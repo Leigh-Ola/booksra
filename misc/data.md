@@ -101,3 +101,11 @@ consider how book deletion should work, and how it affects purchases. Maybe dont
 occasionally run cron job to:
   - check for ending discounts and deactivate them, and update book prices
   - check for starting discounts and activate them, and update book prices
+
+___
+LOCAL CREDENTIALS:
+- admin:
+  - data: test2@gmail.com password
+- user:
+  - data: alphadream75@gmail.com 12345678Ab
+  - data: johnSnow@gmail.com aegonTheConqueror

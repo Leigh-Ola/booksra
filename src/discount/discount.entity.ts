@@ -19,7 +19,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Book } from '../books/book.entity';
-import { DiscountTypeEnum } from '../utils/types';
+import {
+  DiscountTypeEnum,
+  DiscountCategoryEnum,
+  CouponTypeEnum,
+} from '../utils/types';
 @Entity()
 export class Discount {
   @PrimaryGeneratedColumn()
@@ -33,6 +37,17 @@ export class Discount {
 
   @Column({ type: 'enum', enum: DiscountTypeEnum, nullable: false })
   type: DiscountTypeEnum;
+
+  @Column({ type: 'enum', enum: DiscountCategoryEnum, nullable: true })
+  category: DiscountCategoryEnum;
+
+  // only for coupon category
+  @Column({ type: 'enum', enum: CouponTypeEnum, nullable: true })
+  couponType: CouponTypeEnum;
+
+  // only for coupon category
+  @Column({ type: 'numeric', nullable: true, precision: 10, scale: 2 })
+  couponMinValue: number;
 
   @Column({ type: 'numeric', nullable: false, precision: 10, scale: 2 })
   value: number;

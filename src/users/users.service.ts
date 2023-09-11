@@ -10,6 +10,8 @@ import * as bcrypt from 'bcrypt-node';
 import { JwtService } from '@nestjs/jwt';
 import { throwBadRequest, generateRandomNumberString } from '../utils/helpers';
 import { ChangePassword } from './change-password.entity';
+import { forgotPasswordTemplate } from '../mail/templates/forgot-password';
+import { sendMail } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -153,33 +155,39 @@ export class UserService {
     return;
   }
 
-  async sendPasswordToken(email: string, userId: number) {
+  async sendPasswordToken(email: string) {
     const userExists = await this.manager.findOne(User, {
       where: { email: email, password: Not(IsNull()) },
       select: ['id', 'email'],
       relations: ['passwordToken'],
     });
-    if (!userExists || (userExists && userExists.id !== userId)) {
+    if (!userExists) {
       return throwBadRequest('User does not exist');
     }
 
     // get node env
-    let token = generateRandomNumberString(6);
+    const token = generateRandomNumberString(6);
     // nodeEnv === 'production' ? generateRandomNumberString(6) : '000000';
-    // token = await bcrypt.hash(token, 10);
-    token = bcrypt.hashSync(token);
+    const encryptedToken = bcrypt.hashSync(token);
     const passwordTokenEntry = userExists.passwordToken;
+    const template = forgotPasswordTemplate({
+      recipient: userExists.email,
+      subject: 'Password Reset',
+      data: {
+        token,
+      },
+    });
+    await sendMail(template);
     if (passwordTokenEntry?.id) {
       await this.manager.update(ChangePassword, passwordTokenEntry.id, {
-        token,
+        token: encryptedToken,
       });
     } else {
       await this.manager.save(ChangePassword, {
-        token,
+        token: encryptedToken,
         userId: userExists.id,
       });
     }
-    // TODO: send email with token to user
   }
 
   async resetPassword({
@@ -208,10 +216,9 @@ export class UserService {
     if (!passwordTokenEntry?.token) {
       return throwBadRequest('Invalid token');
     }
-    // const isTokenMatch = await bcrypt.compareSync(passwordTokenEntry.token, token);
     const isTokenMatch = await bcrypt.compareSync(
-      passwordTokenEntry.token,
       token,
+      passwordTokenEntry.token,
     );
     if (!isTokenMatch) {
       return throwBadRequest('Incorrect token');

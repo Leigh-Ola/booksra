@@ -19,6 +19,7 @@ const getAppConfig = () => {
         JWT_SECRET: processEnvObj.JWT_SECRET,
         JWT_EXPIRY: processEnvObj.JWT_EXPIRY || '8h',
         TOKEN_EXPIRY: parseInt(String(processEnvObj.TOKEN_EXPIRY), 10) || 5,
+        ELASTIC_EMAIL_HTTP_PASSWORD: processEnvObj.ELASTIC_EMAIL_HTTP_PASSWORD,
         DB_TYPE: processEnvObj.DB_TYPE,
         DB_HOST: processEnvObj.DB_HOST,
         DB_PORT: parseInt(processEnvObj.DB_PORT),
