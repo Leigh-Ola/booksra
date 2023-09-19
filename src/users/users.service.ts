@@ -123,6 +123,7 @@ export class UserService {
       'country',
       'town',
       'state',
+      'role',
     ]) as Partial<User>;
   }
 
