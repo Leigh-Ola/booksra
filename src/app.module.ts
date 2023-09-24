@@ -15,6 +15,7 @@ import { first, has, isArray, isEmpty, values } from 'lodash';
 import { LocationService } from './location/location.service';
 import { LocationController } from './location/location.controller';
 import { LocationModule } from './location/location.module';
+import { MiscModule } from './misc/misc.module';
 
 const processClassValidatorErrors = (
   errors: ValidationError[],
@@ -85,6 +86,7 @@ const validator = new ValidationPipe({
     EntitiesModule,
     DiscountModule,
     LocationModule,
+    MiscModule,
   ],
   controllers: [AppController, EntityController, LocationController],
   providers: [

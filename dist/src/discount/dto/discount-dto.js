@@ -22,17 +22,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDiscountDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(30),
-    __metadata("design:type", String)
-], CreateDiscountDto.prototype, "couponCode", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEnum)(types_1.DiscountTypeEnum),
-    __metadata("design:type", String)
-], CreateDiscountDto.prototype, "type", void 0);
-__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
@@ -48,10 +37,39 @@ __decorate([
     __metadata("design:type", Date)
 ], CreateDiscountDto.prototype, "endDate", void 0);
 __decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.DiscountTypeEnum),
+    __metadata("design:type", String)
+], CreateDiscountDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.DiscountCategoryEnum),
+    __metadata("design:type", String)
+], CreateDiscountDto.prototype, "category", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsInt)({ each: true }),
     __metadata("design:type", Array)
 ], CreateDiscountDto.prototype, "bookIds", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(30),
+    __metadata("design:type", String)
+], CreateDiscountDto.prototype, "couponCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.CouponTypeEnum),
+    __metadata("design:type", String)
+], CreateDiscountDto.prototype, "couponType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateDiscountDto.prototype, "couponMinValue", void 0);
 class UpdateDiscountDto {
 }
 exports.UpdateDiscountDto = UpdateDiscountDto;
@@ -62,18 +80,6 @@ __decorate([
     (0, class_validator_1.MaxLength)(30),
     __metadata("design:type", String)
 ], UpdateDiscountDto.prototype, "name", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(30),
-    __metadata("design:type", String)
-], UpdateDiscountDto.prototype, "couponCode", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEnum)(types_1.DiscountTypeEnum),
-    __metadata("design:type", String)
-], UpdateDiscountDto.prototype, "type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNotEmpty)(),
@@ -93,9 +99,32 @@ __decorate([
     __metadata("design:type", Date)
 ], UpdateDiscountDto.prototype, "endDate", void 0);
 __decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.DiscountTypeEnum),
+    __metadata("design:type", String)
+], UpdateDiscountDto.prototype, "type", void 0);
+__decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsInt)({ each: true }),
     __metadata("design:type", Array)
 ], UpdateDiscountDto.prototype, "bookIds", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(30),
+    __metadata("design:type", String)
+], UpdateDiscountDto.prototype, "couponCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.CouponTypeEnum),
+    __metadata("design:type", String)
+], UpdateDiscountDto.prototype, "couponType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateDiscountDto.prototype, "couponMinValue", void 0);
 //# sourceMappingURL=discount-dto.js.map

@@ -25,7 +25,7 @@ let UserController = class UserController {
         const id = req.user.id;
         const user = await this.usersService.getUser({ id });
         if (!user) {
-            throw new common_1.NotFoundException('User does not exist!');
+            throw new common_1.NotFoundException('User does not exist');
         }
         else {
             return user;

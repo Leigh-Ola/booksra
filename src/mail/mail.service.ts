@@ -14,7 +14,7 @@ const sendMailInDev = async function ({
 }) {
   return new Promise(async (resolve, reject) => {
     // Using elastic email. Limit: 100 emails per day.
-    console.log('Sending email in dev env...');
+    console.log(`Sending email to '${recipient}' in dev env...`);
     const apikey = process.env.ELASTIC_EMAIL_HTTP_PASSWORD;
     const baseurl = 'https://api.elasticemail.com';
     const path = '/v2/email/send';
@@ -50,6 +50,7 @@ const sendMailInDev = async function ({
 };
 
 const sendMailInStaging = sendMailInDev;
+const sendMailInProduction = sendMailInDev;
 
 const sendMail = async function ({
   recipient,
@@ -77,9 +78,16 @@ const sendMail = async function ({
         .catch((err) => {
           reject(`Error sending email: ${err}`);
         });
+    } else if (nodeEnv === 'production') {
+      sendMailInProduction({ recipient, subject, body })
+        .then(() => {
+          resolve('Sent email successfully');
+        })
+        .catch((err) => {
+          reject(`Error sending email: ${err}`);
+        });
     } else {
-      //
-      reject('Email cannot be sent.');
+      reject('Email cannot be sent. Unknown environment.');
     }
   });
 };

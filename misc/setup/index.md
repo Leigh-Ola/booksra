@@ -30,4 +30,12 @@ SUPABASE:
 ___
 RENDER.COM:
 - Backend Nodejs hosting
+___
+ELASTICEMAIL:
+- Email sending service
+- Free 100 emails per day
 ________________________
+Make sure to create sendMailInProduction functions in the mailer.service.ts file
+Make sure to replace db config in the environment variables
+Make sure to replace the JWT_SECRET in the environment variables
+Make sure to replace the SITE_ADMIN_EMAIL in the environment variables

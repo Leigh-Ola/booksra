@@ -120,6 +120,7 @@ let UserService = class UserService {
             'country',
             'town',
             'state',
+            'role',
         ]);
     }
     async updateUser(id, user) {
@@ -169,7 +170,7 @@ let UserService = class UserService {
                 token,
             },
         });
-        await (0, mail_service_1.sendMail)(template);
+        (0, mail_service_1.sendMail)(template);
         if (passwordTokenEntry?.id) {
             await this.manager.update(change_password_entity_1.ChangePassword, passwordTokenEntry.id, {
                 token: encryptedToken,

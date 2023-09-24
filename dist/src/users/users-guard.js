@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IsSuperAdminUser = exports.IsAdminUser = exports.IsUser = void 0;
+exports.IsAnyone = exports.IsSuperAdminUser = exports.IsAdminUser = exports.IsUser = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const types_1 = require("../utils/types");
@@ -91,7 +91,7 @@ let IsSuperAdminUser = class IsSuperAdminUser {
         }
         try {
             const payload = await this.jwtService.verifyAsync(token, {
-                secret: 'secretKey',
+                secret: process.env.JWT_SECRET,
             });
             if (payload.role !== types_1.AppAccessLevelsEnum.SUPERADMIN) {
                 throw new common_1.UnauthorizedException();
@@ -113,4 +113,35 @@ exports.IsSuperAdminUser = IsSuperAdminUser = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [jwt_1.JwtService])
 ], IsSuperAdminUser);
+let IsAnyone = class IsAnyone {
+    constructor(jwtService) {
+        this.jwtService = jwtService;
+    }
+    async canActivate(context) {
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            request['user'] = null;
+        }
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: process.env.JWT_SECRET,
+            });
+            request['user'] = payload;
+        }
+        catch (e) {
+            request['user'] = null;
+        }
+        return true;
+    }
+    extractTokenFromHeader(request) {
+        const [type, token] = request.headers?.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
+    }
+};
+exports.IsAnyone = IsAnyone;
+exports.IsAnyone = IsAnyone = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [jwt_1.JwtService])
+], IsAnyone);
 //# sourceMappingURL=users-guard.js.map

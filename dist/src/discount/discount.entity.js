@@ -33,7 +33,12 @@ __decorate([
     __metadata("design:type", String)
 ], Discount.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: types_1.DiscountCategoryEnum, nullable: true }),
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: types_1.DiscountCategoryEnum,
+        nullable: true,
+        default: types_1.DiscountCategoryEnum.GENERAL,
+    }),
     __metadata("design:type", String)
 ], Discount.prototype, "category", void 0);
 __decorate([
@@ -62,13 +67,13 @@ __decorate([
 ], Discount.prototype, "isActive", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Discount.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Discount.prototype, "updatedAt", void 0);

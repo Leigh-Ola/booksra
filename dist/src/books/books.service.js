@@ -42,6 +42,7 @@ let BookService = class BookService {
         const bookWithCodeExists = await this.manager.findOne(book_entity_1.Book, {
             where: { code: book.code },
             select: ['id'],
+            withDeleted: true,
         });
         if (bookWithCodeExists) {
             return (0, helpers_1.throwBadRequest)('Book code already exists');
@@ -155,6 +156,7 @@ let BookService = class BookService {
         const bookExists = await this.manager.findOne(book_entity_1.Book, {
             where: { id },
             select: ['id'],
+            withDeleted: true,
         });
         if (!bookExists) {
             return (0, helpers_1.throwBadRequest)('Book not found');
@@ -244,7 +246,7 @@ let BookService = class BookService {
         updatedBook.genres = genreEntities;
         await this.manager.save(updatedBook);
     }
-    async getBooks({ title, code, category, ageRange, genre, cover, }, { page, limit } = { page: 1, limit: 10 }) {
+    async getBooks({ title, code, category, ageRange, genre, cover, id, sortByPrice, }, { page, limit } = { page: 1, limit: 10 }, { userRole } = { userRole: null }) {
         page = Number(page) || 1;
         limit = Number(limit) || 10;
         page = page < 1 ? 1 : page;
@@ -254,23 +256,34 @@ let BookService = class BookService {
             .select([
             'book.id',
             'book.title',
+            'book.imageUrl',
             'book.code',
             'book.description',
             'book.cover',
             'book.amountInStock',
+            'book.createdAt',
             'book.discountPrice',
             'book.price',
-            'book.imageUrl',
-            'book.createdAt',
         ])
+            .leftJoinAndSelect('book.genres', 'genres')
             .leftJoinAndSelect('book.category', 'category')
             .leftJoinAndSelect('book.ageRange', 'ageRange')
-            .leftJoinAndSelect('book.genres', 'genre')
             .leftJoinAndSelect('book.discount', 'discount')
             .orderBy('book.createdAt', 'DESC')
             .limit(limit)
             .offset((page - 1) * limit);
+        if (userRole === types_1.AppAccessLevelsEnum.ADMIN ||
+            userRole === types_1.AppAccessLevelsEnum.SUPERADMIN) {
+            queryBuilder.addSelect(['book.deletedAt', 'book.updatedAt']);
+            queryBuilder.withDeleted();
+        }
+        if (id) {
+            queryBuilder.andWhere('book.id = :id', { id });
+        }
         if (title) {
+            if (title.length < 3) {
+                return [];
+            }
             queryBuilder.andWhere('book.title ILike :title', { title: `%${title}%` });
         }
         if (code) {
@@ -287,6 +300,16 @@ let BookService = class BookService {
         }
         if (cover) {
             queryBuilder.andWhere('book.cover = :cover', { cover });
+        }
+        if (sortByPrice) {
+            if (sortByPrice === types_1.SortByPriceEnum.ASCENDING) {
+                queryBuilder.orderBy('book.price', 'ASC');
+                queryBuilder.addOrderBy('book.discountPrice', 'ASC', 'NULLS LAST');
+            }
+            else if (sortByPrice === types_1.SortByPriceEnum.DESCENDING) {
+                queryBuilder.orderBy('book.price', 'DESC');
+                queryBuilder.addOrderBy('book.discountPrice', 'DESC', 'NULLS LAST');
+            }
         }
         const books = await queryBuilder.getMany();
         const response = [];
@@ -312,9 +335,42 @@ let BookService = class BookService {
                     isActive: book.discount?.isActive || null,
                 }) ||
                     null,
+                ...(userRole === types_1.AppAccessLevelsEnum.ADMIN ||
+                    userRole === types_1.AppAccessLevelsEnum.SUPERADMIN
+                    ? {
+                        updatedAt: book.updatedAt,
+                        isDisabled: !!book.deletedAt,
+                    }
+                    : {}),
             });
         }
         return response;
+    }
+    async getBook(id, { userRole } = { userRole: null }) {
+        const book = await this.getBooks({ id }, { page: 1, limit: 1 }, { userRole });
+        if (!book?.length) {
+            return null;
+        }
+        return book[0];
+    }
+    async toggle(id, { enabled }) {
+        if (!id || isNaN(id)) {
+            return (0, helpers_1.throwBadRequest)('Book ID is required');
+        }
+        const bookExists = await this.manager.findOne(book_entity_1.Book, {
+            where: { id },
+            select: ['id'],
+            withDeleted: true,
+        });
+        if (!bookExists) {
+            return (0, helpers_1.throwBadRequest)('Book not found');
+        }
+        if (enabled) {
+            await this.manager.restore(book_entity_1.Book, { id });
+        }
+        else {
+            await this.manager.softDelete(book_entity_1.Book, { id });
+        }
     }
 };
 exports.BookService = BookService;

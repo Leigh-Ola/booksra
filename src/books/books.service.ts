@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager, In, ILike } from 'typeorm';
+import { Repository, DataSource, EntityManager, In } from 'typeorm';
 import { Book } from './book.entity';
 import { Discount } from '../discount/discount.entity';
 import { AgeRange } from './age-range.entity';
@@ -9,8 +9,12 @@ import { Genre } from './genre.entity';
 import { omit, pick, merge } from 'lodash';
 import { throwBadRequest } from '../utils/helpers';
 // import string generator
-import { generateRandomString } from '../utils/helpers';
-import { BookCoversEnum, DiscountTypeEnum } from '../utils/types';
+import {
+  BookCoversEnum,
+  DiscountTypeEnum,
+  SortByPriceEnum,
+  AppAccessLevelsEnum,
+} from '../utils/types';
 import { UpdateBookDto, CreateBookDto } from './dto/books-dto';
 
 @Injectable()
@@ -41,6 +45,7 @@ export class BookService {
     const bookWithCodeExists = await this.manager.findOne(Book, {
       where: { code: book.code },
       select: ['id'],
+      withDeleted: true,
     });
     if (bookWithCodeExists) {
       return throwBadRequest('Book code already exists');
@@ -178,6 +183,7 @@ export class BookService {
     const bookExists = await this.manager.findOne(Book, {
       where: { id },
       select: ['id'],
+      withDeleted: true,
     });
     if (!bookExists) {
       return throwBadRequest('Book not found');
@@ -299,6 +305,8 @@ export class BookService {
       ageRange,
       genre,
       cover,
+      id,
+      sortByPrice,
     }: {
       title?: string;
       code?: string;
@@ -306,8 +314,11 @@ export class BookService {
       ageRange?: string;
       genre?: string;
       cover?: BookCoversEnum;
+      id?: number;
+      sortByPrice?: SortByPriceEnum;
     },
     { page, limit }: { page?: number; limit?: number } = { page: 1, limit: 10 },
+    { userRole }: { userRole?: string } = { userRole: null },
   ) {
     page = Number(page) || 1;
     limit = Number(limit) || 10;
@@ -318,24 +329,39 @@ export class BookService {
       .select([
         'book.id',
         'book.title',
+        'book.imageUrl',
         'book.code',
         'book.description',
         'book.cover',
         'book.amountInStock',
+        'book.createdAt',
         'book.discountPrice',
         'book.price',
-        'book.imageUrl',
-        'book.createdAt',
       ])
+      .leftJoinAndSelect('book.genres', 'genres')
       .leftJoinAndSelect('book.category', 'category')
       .leftJoinAndSelect('book.ageRange', 'ageRange')
-      .leftJoinAndSelect('book.genres', 'genre')
       .leftJoinAndSelect('book.discount', 'discount')
-      .orderBy('book.createdAt', 'DESC')
+      .orderBy('book.createdAt', 'DESC') // this sorts from newest to oldest
       .limit(limit)
       .offset((page - 1) * limit);
 
+    if (
+      userRole === AppAccessLevelsEnum.ADMIN ||
+      userRole === AppAccessLevelsEnum.SUPERADMIN
+    ) {
+      queryBuilder.addSelect(['book.deletedAt', 'book.updatedAt']);
+      queryBuilder.withDeleted();
+    }
+
+    if (id) {
+      queryBuilder.andWhere('book.id = :id', { id });
+    }
+
     if (title) {
+      if (title.length < 3) {
+        return [];
+      }
       queryBuilder.andWhere('book.title ILike :title', { title: `%${title}%` });
     }
 
@@ -357,6 +383,18 @@ export class BookService {
 
     if (cover) {
       queryBuilder.andWhere('book.cover = :cover', { cover });
+    }
+
+    if (sortByPrice) {
+      if (sortByPrice === SortByPriceEnum.ASCENDING) {
+        queryBuilder.orderBy('book.price', 'ASC');
+        // if discountPrice is not null, order by discountPrice
+        queryBuilder.addOrderBy('book.discountPrice', 'ASC', 'NULLS LAST');
+      } else if (sortByPrice === SortByPriceEnum.DESCENDING) {
+        queryBuilder.orderBy('book.price', 'DESC');
+        // if discountPrice is not null, order by discountPrice
+        queryBuilder.addOrderBy('book.discountPrice', 'DESC', 'NULLS LAST');
+      }
     }
 
     const books = await queryBuilder.getMany();
@@ -384,8 +422,54 @@ export class BookService {
             isActive: book.discount?.isActive || null,
           }) ||
           null,
+        ...(userRole === AppAccessLevelsEnum.ADMIN ||
+        userRole === AppAccessLevelsEnum.SUPERADMIN
+          ? {
+              updatedAt: book.updatedAt,
+              isDisabled: !!book.deletedAt,
+            }
+          : {}),
       });
     }
     return response;
+  }
+
+  // get a single book
+  async getBook(
+    id: number,
+    { userRole }: { userRole?: string } = { userRole: null },
+  ) {
+    const book = await this.getBooks(
+      { id },
+      { page: 1, limit: 1 },
+      { userRole },
+    );
+    if (!book?.length) {
+      return null;
+    }
+    return book[0];
+  }
+
+  // toogle book availability with soft delete, depending on { enabled: boolean }
+  async toggle(id: number, { enabled }: { enabled: boolean }) {
+    if (!id || isNaN(id)) {
+      return throwBadRequest('Book ID is required');
+    }
+    // make sure the book exists
+    const bookExists = await this.manager.findOne(Book, {
+      where: { id },
+      select: ['id'],
+      withDeleted: true,
+    });
+    if (!bookExists) {
+      return throwBadRequest('Book not found');
+    }
+    if (enabled) {
+      // enable book
+      await this.manager.restore(Book, { id });
+    } else {
+      // disable book
+      await this.manager.softDelete(Book, { id });
+    }
   }
 }

@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   Index,
   ManyToOne,
   ManyToMany,
@@ -38,14 +39,19 @@ export class Book {
   amountInStock: number;
 
   @CreateDateColumn({
-    type: 'time with time zone',
+    type: 'timestamp with time zone',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'time with time zone',
+    type: 'timestamp with time zone',
   })
   updatedAt: Date;
+
+  @DeleteDateColumn({
+    type: 'timestamp with time zone',
+  })
+  deletedAt: Date;
 
   // discount price
   @Column({
