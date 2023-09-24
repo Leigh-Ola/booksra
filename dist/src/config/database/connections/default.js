@@ -11,8 +11,6 @@ if (!worker_threads_1.isMainThread) {
     (0, lodash_1.set)(dataSourceConfig, 'extra.max', 1);
 }
 const dataSource = new typeorm_1.DataSource(dataSourceConfig);
-console.log('dataSourceConfig', dataSourceConfig);
-console.log('dataSource', dataSource);
 let pool = undefined;
 const getPool = async () => {
     const poolRef = await (0, until_promise_1.default)(() => {

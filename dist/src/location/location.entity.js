@@ -32,19 +32,19 @@ __decorate([
 ], Location.prototype, "price", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Location.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Location.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Location.prototype, "deletedAt", void 0);

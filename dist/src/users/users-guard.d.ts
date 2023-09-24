@@ -18,3 +18,9 @@ export declare class IsSuperAdminUser implements CanActivate {
     canActivate(context: ExecutionContext): Promise<boolean>;
     private extractTokenFromHeader;
 }
+export declare class IsAnyone implements CanActivate {
+    private jwtService;
+    constructor(jwtService: JwtService);
+    canActivate(context: ExecutionContext): Promise<boolean>;
+    private extractTokenFromHeader;
+}

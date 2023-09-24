@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.BookCoversEnum = exports.AppAccessLevelsEnum = void 0;
+exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.SortByPriceEnum = exports.BookCoversEnum = exports.AppAccessLevelsEnum = void 0;
 var AppAccessLevelsEnum;
 (function (AppAccessLevelsEnum) {
     AppAccessLevelsEnum["USER"] = "user";
@@ -13,6 +13,11 @@ var BookCoversEnum;
     BookCoversEnum["PAPERBACK"] = "paperback";
     BookCoversEnum["EBOOK"] = "ebook";
 })(BookCoversEnum || (exports.BookCoversEnum = BookCoversEnum = {}));
+var SortByPriceEnum;
+(function (SortByPriceEnum) {
+    SortByPriceEnum["ASCENDING"] = "ascending";
+    SortByPriceEnum["DESCENDING"] = "descending";
+})(SortByPriceEnum || (exports.SortByPriceEnum = SortByPriceEnum = {}));
 var DiscountTypeEnum;
 (function (DiscountTypeEnum) {
     DiscountTypeEnum["FIXED"] = "fixed";
@@ -22,12 +27,12 @@ var DiscountCategoryEnum;
 (function (DiscountCategoryEnum) {
     DiscountCategoryEnum["GIFT"] = "gift";
     DiscountCategoryEnum["COUPON"] = "coupon";
-    DiscountCategoryEnum["DISCOUNT"] = "discount";
+    DiscountCategoryEnum["GENERAL"] = "general";
+    DiscountCategoryEnum["FREE_SHIPPING"] = "free_shipping";
 })(DiscountCategoryEnum || (exports.DiscountCategoryEnum = DiscountCategoryEnum = {}));
 var CouponTypeEnum;
 (function (CouponTypeEnum) {
     CouponTypeEnum["MINIMUM_PRICE"] = "minimum_price";
     CouponTypeEnum["MINIMUM_QUANTITY"] = "minimum_quantity";
-    CouponTypeEnum["FREE_SHIPPING"] = "free_shipping";
 })(CouponTypeEnum || (exports.CouponTypeEnum = CouponTypeEnum = {}));
 //# sourceMappingURL=types.js.map

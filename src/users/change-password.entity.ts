@@ -17,7 +17,7 @@ export class ChangePassword {
   token: string;
 
   @UpdateDateColumn({
-    type: 'time with time zone',
+    type: 'timestamp with time zone',
   })
   updatedAt: Date;
 

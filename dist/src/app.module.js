@@ -23,6 +23,7 @@ const lodash_1 = require("lodash");
 const location_service_1 = require("./location/location.service");
 const location_controller_1 = require("./location/location.controller");
 const location_module_1 = require("./location/location.module");
+const misc_module_1 = require("./misc/misc.module");
 const processClassValidatorErrors = (errors, parent = {}) => {
     const formattedErrors = errors.reduce((prev, error) => {
         if (!(0, lodash_1.has)(prev, error.property)) {
@@ -79,6 +80,7 @@ exports.AppModule = AppModule = __decorate([
             entities_module_1.EntitiesModule,
             discount_module_1.DiscountModule,
             location_module_1.LocationModule,
+            misc_module_1.MiscModule,
         ],
         controllers: [app_controller_1.AppController, entities_controller_1.EntityController, location_controller_1.LocationController],
         providers: [

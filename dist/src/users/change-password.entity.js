@@ -25,7 +25,7 @@ __decorate([
 ], ChangePassword.prototype, "token", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], ChangePassword.prototype, "updatedAt", void 0);

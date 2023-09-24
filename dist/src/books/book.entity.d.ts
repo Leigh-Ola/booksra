@@ -13,6 +13,7 @@ export declare class Book {
     amountInStock: number;
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date;
     discountPrice: number | null;
     price: number;
     discountId: number | null;

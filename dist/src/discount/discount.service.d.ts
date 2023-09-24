@@ -8,7 +8,8 @@ export declare class DiscountService {
     private isDatePassed;
     create(discountDto: CreateDiscountDto): Promise<never>;
     update(id: number, discountDto: UpdateDiscountDto): Promise<never>;
-    private updateBooks;
+    private updateBooksInDiscount;
+    private removeBooksFromDiscount;
     find({ page, limit, query, }?: {
         page: number;
         limit: number;

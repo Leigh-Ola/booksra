@@ -9,22 +9,17 @@ import {
   IsEnum,
   IsDateString,
 } from 'class-validator';
-import { DiscountTypeEnum } from '../../utils/types';
+import {
+  DiscountTypeEnum,
+  DiscountCategoryEnum,
+  CouponTypeEnum,
+} from '../../utils/types';
 
 export class CreateDiscountDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(30)
   name: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(30)
-  couponCode?: string;
-
-  @IsNotEmpty()
-  @IsEnum(DiscountTypeEnum)
-  type: DiscountTypeEnum;
 
   @IsNotEmpty()
   @IsNumber()
@@ -38,9 +33,41 @@ export class CreateDiscountDto {
   @IsDateString()
   endDate: Date;
 
+  // required
+  @IsNotEmpty()
+  @IsEnum(DiscountTypeEnum)
+  type: DiscountTypeEnum;
+
+  // required
+  @IsNotEmpty()
+  @IsEnum(DiscountCategoryEnum)
+  category: DiscountCategoryEnum;
+
+  // if GENERAL category
+  // optional
+  @IsOptional()
   @IsArray()
   @IsInt({ each: true })
-  bookIds: number[];
+  bookIds?: number[];
+
+  // if COUPON category
+  // optional
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  couponCode?: string;
+
+  // optional
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(CouponTypeEnum)
+  couponType?: CouponTypeEnum;
+
+  // optional
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  couponMinValue?: number;
 }
 
 export class UpdateDiscountDto {
@@ -49,16 +76,6 @@ export class UpdateDiscountDto {
   @IsString()
   @MaxLength(30)
   name?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(30)
-  couponCode?: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsEnum(DiscountTypeEnum)
-  type?: DiscountTypeEnum;
 
   @IsOptional()
   @IsNotEmpty()
@@ -75,8 +92,36 @@ export class UpdateDiscountDto {
   @IsDateString()
   endDate?: Date;
 
+  // required
+  @IsNotEmpty()
+  @IsEnum(DiscountTypeEnum)
+  type?: DiscountTypeEnum;
+
+  // NOTE: You cannot update the category of a discount
+
+  // if GENERAL category
+  // optional
   @IsOptional()
   @IsArray()
   @IsInt({ each: true })
   bookIds?: number[];
+
+  // if COUPON category
+  // optional
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  couponCode?: string;
+
+  // optional
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(CouponTypeEnum)
+  couponType?: CouponTypeEnum;
+
+  // optional
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  couponMinValue?: number;
 }

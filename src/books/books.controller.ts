@@ -8,10 +8,11 @@ import {
   Query,
   Controller,
   Get,
+  Request,
 } from '@nestjs/common';
-import { IsAdminUser } from '../users/users-guard';
+import { IsAdminUser, IsAnyone } from '../users/users-guard';
 import { CreateBookDto, UpdateBookDto } from './dto/books-dto';
-import { BookCoversEnum } from '../utils/types';
+import { BookCoversEnum, SortByPriceEnum } from '../utils/types';
 
 @Controller('book')
 export class BookController {
@@ -33,7 +34,9 @@ export class BookController {
 
   // get all matched books
   @Get()
+  @UseGuards(IsAnyone)
   async findAll(
+    @Request() req,
     @Query('title') title: string,
     @Query('code') code: string,
     @Query('genre') genre: string,
@@ -42,7 +45,9 @@ export class BookController {
     @Query('cover') cover: BookCoversEnum,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('sortByPrice') sortByPrice?: SortByPriceEnum,
   ) {
+    const userRole = req.user?.role;
     return this.booksService.getBooks(
       {
         title,
@@ -51,11 +56,32 @@ export class BookController {
         category,
         ageRange,
         cover,
+        sortByPrice,
       },
       {
         page,
         limit,
       },
+      {
+        userRole,
+      },
     );
+  }
+
+  // get specific book by id
+  @Get(':id')
+  @UseGuards(IsAnyone)
+  async findOne(@Param('id') id: number, @Request() req) {
+    const userRole = req.user?.role;
+    return this.booksService.getBook(id, {
+      userRole,
+    });
+  }
+
+  // enable or disable a book
+  @Post(':id/toggle')
+  @UseGuards(IsAdminUser)
+  async toggle(@Param('id') id: number, @Body() data: { enabled: boolean }) {
+    return this.booksService.toggle(id, data);
   }
 }

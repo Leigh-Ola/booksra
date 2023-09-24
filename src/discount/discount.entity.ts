@@ -38,7 +38,12 @@ export class Discount {
   @Column({ type: 'enum', enum: DiscountTypeEnum, nullable: false })
   type: DiscountTypeEnum;
 
-  @Column({ type: 'enum', enum: DiscountCategoryEnum, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: DiscountCategoryEnum,
+    nullable: true,
+    default: DiscountCategoryEnum.GENERAL,
+  })
   category: DiscountCategoryEnum;
 
   // only for coupon category
@@ -62,12 +67,12 @@ export class Discount {
   isActive: boolean;
 
   @CreateDateColumn({
-    type: 'time with time zone',
+    type: 'timestamp with time zone',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'time with time zone',
+    type: 'timestamp with time zone',
   })
   updatedAt: Date;
 

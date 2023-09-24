@@ -1,19 +1,24 @@
-import { DiscountTypeEnum } from '../../utils/types';
+import { DiscountTypeEnum, DiscountCategoryEnum, CouponTypeEnum } from '../../utils/types';
 export declare class CreateDiscountDto {
     name: string;
-    couponCode?: string;
-    type: DiscountTypeEnum;
     value: number;
     startDate: Date;
     endDate: Date;
-    bookIds: number[];
+    type: DiscountTypeEnum;
+    category: DiscountCategoryEnum;
+    bookIds?: number[];
+    couponCode?: string;
+    couponType?: CouponTypeEnum;
+    couponMinValue?: number;
 }
 export declare class UpdateDiscountDto {
     name?: string;
-    couponCode?: string;
-    type?: DiscountTypeEnum;
     value?: number;
     startDate?: Date;
     endDate?: Date;
+    type?: DiscountTypeEnum;
     bookIds?: number[];
+    couponCode?: string;
+    couponType?: CouponTypeEnum;
+    couponMinValue?: number;
 }
