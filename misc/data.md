@@ -109,3 +109,16 @@ LOCAL CREDENTIALS:
 - user:
   - data: alphadream75@gmail.com 12345678Ab
   - data: johnSnow@gmail.com aegonTheConqueror
+___
+STAGING CREDENTIALS:
+- user:
+  - data: alphadream75@gmail.com 12345678Ab
+  - data: johnDoe@user.com aegonTheConqueror1
+
+
+// added disabling and enabling of books
+// added role to users
+// fix date issue on forgot password
+// add email for contact us (cant send email more than once in [staging: 1, production: 5] minutes)
+// add sort by price on books
+// updated discount endpoints to include categories. Note: you cant update the category of a discount

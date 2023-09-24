@@ -8,6 +8,10 @@ export declare enum BookCoversEnum {
     PAPERBACK = "paperback",
     EBOOK = "ebook"
 }
+export declare enum SortByPriceEnum {
+    ASCENDING = "ascending",
+    DESCENDING = "descending"
+}
 export declare enum DiscountTypeEnum {
     FIXED = "fixed",
     PERCENTAGE = "percentage"
@@ -15,10 +19,10 @@ export declare enum DiscountTypeEnum {
 export declare enum DiscountCategoryEnum {
     GIFT = "gift",
     COUPON = "coupon",
-    DISCOUNT = "discount"
+    GENERAL = "general",
+    FREE_SHIPPING = "free_shipping"
 }
 export declare enum CouponTypeEnum {
     MINIMUM_PRICE = "minimum_price",
-    MINIMUM_QUANTITY = "minimum_quantity",
-    FREE_SHIPPING = "free_shipping"
+    MINIMUM_QUANTITY = "minimum_quantity"
 }

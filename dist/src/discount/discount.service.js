@@ -34,6 +34,9 @@ let DiscountService = class DiscountService {
             'startDate',
             'endDate',
             'bookIds',
+            'couponType',
+            'couponMinValue',
+            'category',
         ]);
         if (discountDto.type === types_1.DiscountTypeEnum.PERCENTAGE &&
             (discountDto.value < 0 || discountDto.value > 100)) {
@@ -45,7 +48,51 @@ let DiscountService = class DiscountService {
         if (await this.isDatePassed(new Date(discountDto.endDate), new Date())) {
             return (0, helpers_1.throwBadRequest)('The end date has passed');
         }
-        if (discountDto.couponCode) {
+        const discount = discountDto;
+        if (await this.isDatePassed(new Date(discountDto.startDate), new Date())) {
+            discount.isActive = true;
+        }
+        else {
+            discount.isActive = false;
+        }
+        if (discountDto.category === types_1.DiscountCategoryEnum.GENERAL) {
+            if (!discountDto.bookIds?.length) {
+                return (0, helpers_1.throwBadRequest)('Book IDs are required for general discounts');
+            }
+            const foundBooks = await this.manager.find(book_entity_1.Book, {
+                where: {
+                    id: (0, typeorm_1.In)(discountDto.bookIds),
+                },
+                select: ['id', 'code', 'title', 'discount'],
+                relations: ['discount'],
+                withDeleted: true,
+            });
+            const notFoundBooks = (0, lodash_1.xorBy)(discountDto.bookIds, foundBooks.map((book) => book.id));
+            if (foundBooks.length !== discountDto.bookIds.length) {
+                return (0, helpers_1.throwBadRequest)(`${notFoundBooks.length} book(s) you selected were not found: ${notFoundBooks.join(', ')}`);
+            }
+            const booksWithDiscount = foundBooks.filter((book) => book.discount);
+            if (booksWithDiscount.length) {
+                return (0, helpers_1.throwBadRequest)('Unable to proceed. The following books already have another discount: ' +
+                    booksWithDiscount
+                        .map((book) => {
+                        return `${book.id} (${book.title})`;
+                    })
+                        .join(', '));
+            }
+            discount.books = foundBooks;
+        }
+        else if (discountDto.category === types_1.DiscountCategoryEnum.COUPON ||
+            discountDto.category === types_1.DiscountCategoryEnum.FREE_SHIPPING) {
+            if (!discountDto.couponType ||
+                !discountDto.couponMinValue ||
+                !discountDto.couponCode) {
+                return (0, helpers_1.throwBadRequest)('Coupon type, coupon min value and coupon code are required for coupon discounts');
+            }
+            if (typeof discountDto.couponMinValue !== 'number' ||
+                discountDto.couponMinValue < 0) {
+                return (0, helpers_1.throwBadRequest)('Coupon min value should not be less than 0');
+            }
             const existingDiscount = await this.manager.findOne(discount_entity_1.Discount, {
                 where: {
                     couponCode: String(discountDto.couponCode).toLowerCase(),
@@ -55,36 +102,14 @@ let DiscountService = class DiscountService {
                 return (0, helpers_1.throwBadRequest)('This coupon code already exists');
             }
             else {
-                discountDto.couponCode = String(discountDto.couponCode).toLowerCase();
+                discount.couponCode = String(discountDto.couponCode).toLowerCase();
             }
         }
-        const discount = discountDto;
-        if (await this.isDatePassed(new Date(discountDto.startDate), new Date())) {
-            discount.isActive = true;
-        }
-        else {
-            discount.isActive = false;
-        }
-        const foundBooks = await this.manager.find(book_entity_1.Book, {
-            where: {
-                id: (0, typeorm_1.In)(discountDto.bookIds),
-            },
-            relations: ['discount'],
-        });
-        if (foundBooks.length !== discountDto.bookIds.length) {
-            return (0, helpers_1.throwBadRequest)(discount.bookIds.length -
-                foundBooks.length +
-                ' book(s) you selected were not found');
-        }
-        const booksWithDiscount = foundBooks.filter((book) => book.discount);
-        if (booksWithDiscount.length) {
-            return (0, helpers_1.throwBadRequest)('Unable to proceed. The following books already have a discount: ' +
-                booksWithDiscount.map((book) => book.code).join(', '));
-        }
-        discount.books = foundBooks;
         const newDiscount = await this.manager.create(discount_entity_1.Discount, discount);
         const createdDiscount = await this.manager.save(newDiscount);
-        await this.updateBooks(discountDto.bookIds, createdDiscount);
+        if (discountDto.category === types_1.DiscountCategoryEnum.GENERAL) {
+            await this.updateBooksInDiscount(discountDto.bookIds, createdDiscount);
+        }
     }
     async update(id, discountDto) {
         if (!id || isNaN(id)) {
@@ -94,7 +119,8 @@ let DiscountService = class DiscountService {
             where: {
                 id,
             },
-            select: ['id'],
+            select: ['id', 'category', 'books'],
+            relations: ['books'],
         });
         if (!discountExists) {
             return (0, helpers_1.throwBadRequest)('Discount not found');
@@ -107,6 +133,9 @@ let DiscountService = class DiscountService {
             'startDate',
             'endDate',
             'bookIds',
+            'couponType',
+            'couponMinValue',
+            'category',
         ]);
         if (discountDto.type === types_1.DiscountTypeEnum.PERCENTAGE &&
             (discountDto.value < 0 || discountDto.value > 100)) {
@@ -118,19 +147,6 @@ let DiscountService = class DiscountService {
         if (await this.isDatePassed(new Date(discountDto.endDate), new Date())) {
             return (0, helpers_1.throwBadRequest)('The end date has passed');
         }
-        if (discountDto.couponCode) {
-            const discountWithSameCouponCode = await this.manager.findOne(discount_entity_1.Discount, {
-                where: {
-                    couponCode: String(discountDto.couponCode).toLowerCase(),
-                },
-            });
-            if (discountWithSameCouponCode && discountWithSameCouponCode.id !== id) {
-                return (0, helpers_1.throwBadRequest)('This coupon code already exists');
-            }
-            else {
-                discountDto.couponCode = String(discountDto.couponCode).toLowerCase();
-            }
-        }
         const discount = discountDto;
         if (await this.isDatePassed(new Date(discountDto.startDate), new Date())) {
             discount.isActive = true;
@@ -138,30 +154,65 @@ let DiscountService = class DiscountService {
         else {
             discount.isActive = false;
         }
-        if (discountDto.bookIds?.length) {
-            const foundBooks = await this.manager.find(book_entity_1.Book, {
-                where: {
-                    id: (0, typeorm_1.In)(discountDto.bookIds),
-                },
-                relations: ['discount'],
-            });
-            if (foundBooks.length !== discountDto.bookIds.length) {
-                return (0, helpers_1.throwBadRequest)(discount.bookIds.length -
-                    foundBooks.length +
-                    ' book(s) you selected were not found');
+        let removedBookIds = [];
+        if (discountExists.category === types_1.DiscountCategoryEnum.GENERAL) {
+            if (discountDto.bookIds?.length) {
+                const foundBooks = await this.manager.find(book_entity_1.Book, {
+                    where: {
+                        id: (0, typeorm_1.In)(discountDto.bookIds),
+                    },
+                    select: ['id', 'code', 'title', 'discount'],
+                    relations: ['discount'],
+                    withDeleted: true,
+                });
+                const notFoundBooks = (0, lodash_1.xorBy)(discountDto.bookIds, foundBooks.map((book) => book.id));
+                if (foundBooks.length !== discountDto.bookIds.length) {
+                    return (0, helpers_1.throwBadRequest)(`${notFoundBooks.length} book(s) you selected were not found: ${notFoundBooks.join(', ')}`);
+                }
+                const booksWithDiscount = foundBooks.filter((book) => book.discount && book.discount.id !== id);
+                if (booksWithDiscount.length) {
+                    return (0, helpers_1.throwBadRequest)('Unable to proceed. The following books already have another discount: ' +
+                        booksWithDiscount
+                            .map((book) => {
+                            return `${book.id} (${book.title})`;
+                        })
+                            .join(', '));
+                }
+                removedBookIds = discountExists.books
+                    .filter((book) => !foundBooks.find((b) => b.id === book.id))
+                    .map((book) => book.id);
+                discount.books = foundBooks;
             }
-            const booksWithDiscount = foundBooks.filter((book) => book.discount && book.discount.id !== id);
-            if (booksWithDiscount.length) {
-                return (0, helpers_1.throwBadRequest)('Unable to proceed. The following books already have another discount: ' +
-                    booksWithDiscount.map((book) => book.code).join(', '));
+        }
+        else if (discountExists.category === types_1.DiscountCategoryEnum.COUPON ||
+            discountExists.category === types_1.DiscountCategoryEnum.FREE_SHIPPING) {
+            if (discountDto.couponMinValue &&
+                (typeof discountDto.couponMinValue !== 'number' ||
+                    discountDto.couponMinValue < 0)) {
+                return (0, helpers_1.throwBadRequest)('Coupon min value should not be less than 0');
             }
-            discount.books = foundBooks;
+            if (discountDto.couponCode) {
+                const existingDiscount = await this.manager.findOne(discount_entity_1.Discount, {
+                    where: {
+                        couponCode: String(discountDto.couponCode).toLowerCase(),
+                    },
+                });
+                if (existingDiscount && existingDiscount.id !== id) {
+                    return (0, helpers_1.throwBadRequest)('This coupon code already exists');
+                }
+                else {
+                    discount.couponCode = String(discountDto.couponCode).toLowerCase();
+                }
+            }
         }
         const updatedDiscount = (0, lodash_1.merge)(discountExists, discount);
         await this.manager.save(updatedDiscount);
-        await this.updateBooks(discountDto.bookIds, updatedDiscount);
+        if (discountExists.category === types_1.DiscountCategoryEnum.GENERAL) {
+            await this.removeBooksFromDiscount(removedBookIds);
+            await this.updateBooksInDiscount(discountDto.bookIds, updatedDiscount);
+        }
     }
-    async updateBooks(bookIds, discount) {
+    async updateBooksInDiscount(bookIds, discount) {
         if (!bookIds?.length) {
             return;
         }
@@ -172,6 +223,17 @@ let DiscountService = class DiscountService {
         await this.manager.query(`
         UPDATE "book"
         SET "discountId" = ${discount.id}, "discountPrice" = ${discountValueExpression}
+        WHERE "id" IN (${bookIdsStr})
+      `);
+    }
+    async removeBooksFromDiscount(bookIds) {
+        if (!bookIds?.length) {
+            return;
+        }
+        const bookIdsStr = bookIds.join(', ');
+        await this.manager.query(`
+        UPDATE "book"
+        SET "discountId" = null, "discountPrice" = null
         WHERE "id" IN (${bookIdsStr})
       `);
     }

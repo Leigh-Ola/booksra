@@ -178,7 +178,7 @@ export class UserService {
         token,
       },
     });
-    await sendMail(template);
+    sendMail(template);
     if (passwordTokenEntry?.id) {
       await this.manager.update(ChangePassword, passwordTokenEntry.id, {
         token: encryptedToken,

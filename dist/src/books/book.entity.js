@@ -49,16 +49,22 @@ __decorate([
 ], Book.prototype, "amountInStock", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Book.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({
-        type: 'time with time zone',
+        type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
 ], Book.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({
+        type: 'timestamp with time zone',
+    }),
+    __metadata("design:type", Date)
+], Book.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'numeric',

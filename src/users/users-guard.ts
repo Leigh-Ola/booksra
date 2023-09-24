@@ -86,7 +86,7 @@ export class IsSuperAdminUser implements CanActivate {
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: 'secretKey',
+        secret: process.env.JWT_SECRET,
       });
       if (payload.role !== AppAccessLevelsEnum.SUPERADMIN) {
         throw new UnauthorizedException();
@@ -102,6 +102,33 @@ export class IsSuperAdminUser implements CanActivate {
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}
+
+@Injectable()
+export class IsAnyone implements CanActivate {
+  constructor(private jwtService: JwtService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+    if (!token) {
+      request['user'] = null;
+    }
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+      request['user'] = payload;
+    } catch (e) {
+      request['user'] = null;
+    }
+    return true;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers?.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
 }

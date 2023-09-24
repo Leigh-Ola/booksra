@@ -8,6 +8,8 @@ declare const _default: (() => {
     JWT_SECRET: string;
     JWT_EXPIRY: string;
     TOKEN_EXPIRY: number;
+    SITE_ADMIN_EMAIL: string;
+    EMAIL_MIN_INTERVAL: number;
     ELASTIC_EMAIL_HTTP_PASSWORD: string;
     DB_TYPE: string;
     DB_HOST: string;
@@ -34,6 +36,8 @@ declare const _default: (() => {
     JWT_SECRET: string;
     JWT_EXPIRY: string;
     TOKEN_EXPIRY: number;
+    SITE_ADMIN_EMAIL: string;
+    EMAIL_MIN_INTERVAL: number;
     ELASTIC_EMAIL_HTTP_PASSWORD: string;
     DB_TYPE: string;
     DB_HOST: string;
