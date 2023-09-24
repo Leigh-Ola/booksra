@@ -13,16 +13,18 @@ const contactUsTemplate = ({
   };
 }) => {
   const html = `
-    <div style="font-family: sans-serif; text-align: center;">
-        <p style="color: #4a4a4a;"><b>Name:</b> ${data.name}</p>
-        <p style="color: #4a4a4a;"><b>Email:</b> ${data.email}</p>
+    <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; color: #444;">
+        <h2 style="color: #2F4F4F;">Contact Information</h2>
+        <p><b>Name:</b> <span style="color: #696969;">${data.name}</span></p>
+        <p><b>Email:</b> <span style="color: #696969;">${data.email}</span></p>
         ${
           data.company
-            ? `<p style="color: #4a4a4a;"><b>Company:</b> ${data.company}</p>`
-            : '<center><small><i>Company not provided</i></small></center>'
+            ? `<p><b>Company:</b> <span style="color: #696969;">${data.company}</span></p>`
+            : '<p><small><i>Company not provided</i></small></p>'
         }
-        </hr>
-        <p style="color: #4a4a4a;">${data.message}</p>
+        <hr style="border-top: 1px solid #2F4F4F;">
+        <h3 style="color: #2F4F4F;">Message</h3>
+        <p style="text-align: left; color: #696969;">${data.message}</p>
     </div>
         `;
   return {
