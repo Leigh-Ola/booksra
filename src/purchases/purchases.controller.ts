@@ -22,4 +22,12 @@ export class PurchasesController {
     const id = req.user.id;
     return this.purchasesService.calculatePurchase(data, id);
   }
+
+  // create a purchase
+  @Post('/create')
+  @UseGuards(IsUser)
+  async createPurchase(@Request() req, @Body() data: CalculatePurchaseDto) {
+    const id = req.user.id;
+    return this.purchasesService.createPurchase(data, id);
+  }
 }

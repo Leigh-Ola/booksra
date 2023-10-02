@@ -36,6 +36,35 @@ export class PurchasesService {
     return this.calculateBooksPrice(data);
   }
 
+  async createPurchase(data: CalculatePurchaseDto, userId: string) {
+    // ensure that the user exists.
+    const user = await this.manager.findOne('User', {
+      where: {
+        id: userId,
+      },
+      select: ['id'],
+    });
+    if (!user) {
+      throwBadRequest('User not found');
+    }
+    // // calculate the price of the books
+    // const { data: booksData, finalPrice } =
+    //   await this.calculateBooksPrice(data);
+    // // create the purchase
+    // const purchase = await this.manager.save('Purchase', {
+    //   userId,
+    //   totalPrice: finalPrice,
+    //   notes: data.notes,
+    //   calculatedPriceData: booksData,
+    //   booksData: data.books,
+    // });
+    // // create the purchase books
+
+    // initialize the purchase via paystack
+
+    return;
+  }
+
   private async calculateBooksPrice(data: CalculatePurchaseDto) {
     let promo: {
       type: DiscountTypeEnum;
