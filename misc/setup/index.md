@@ -39,3 +39,5 @@ Make sure to create sendMailInProduction functions in the mailer.service.ts file
 Make sure to replace db config in the environment variables
 Make sure to replace the JWT_SECRET in the environment variables
 Make sure to replace the SITE_ADMIN_EMAIL in the environment variables
+Make sure to replace the NODE_ENV in the environment variables
+Make sure to setup background job environment variables and activate cronjob 

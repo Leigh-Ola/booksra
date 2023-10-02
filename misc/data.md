@@ -102,6 +102,12 @@ occasionally run cron job to:
   - check for ending discounts and deactivate them, and update book prices
   - check for starting discounts and activate them, and update book prices
 
+if is coupon with code, then only apply when coupon code is provided
+if is coupon without code, then apply to all purchases that match couponType and couponMinValue
+if is general discount, then apply to any books in any purchase, where the book has the the discountId
+if is free shipping, then dont apply delivery price to purchase
+if is gift, ensure to add gift name to purchase email
+
 ___
 LOCAL CREDENTIALS:
 - admin:

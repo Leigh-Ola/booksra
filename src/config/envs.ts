@@ -28,6 +28,9 @@ const getAppConfig = () => {
 
     ELASTIC_EMAIL_HTTP_PASSWORD: processEnvObj.ELASTIC_EMAIL_HTTP_PASSWORD,
 
+    BACKGROUND_JOB_CODE: processEnvObj.BACKGROUND_JOB_CODE,
+    ALLOW_BACKGROUND_JOBS: processEnvObj.ALLOW_BACKGROUND_JOBS,
+
     DB_TYPE: processEnvObj.DB_TYPE,
     DB_HOST: processEnvObj.DB_HOST,
     DB_PORT: parseInt(processEnvObj.DB_PORT),
