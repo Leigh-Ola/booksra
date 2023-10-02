@@ -9,7 +9,7 @@ export class Sh1695588030044 implements MigrationInterface {
     const discounts = await queryRunner.manager.find(Discount, {
       where: { category: IsNull() },
     });
-    console.log({ discounts: discounts.map((d) => d.id) || 'idk' });
+    // console.log({ discounts: discounts.map((d) => d.id) || 'idk' });
     discounts.forEach(async (discount) => {
       discount.category = DiscountCategoryEnum.GENERAL;
       discount.couponCode = null;
