@@ -20,10 +20,20 @@ let BackgroundJobsController = class BackgroundJobsController {
         this.backgroundJobsService = backgroundJobsService;
     }
     async getGenre(code) {
-        return this.backgroundJobsService.deleteOldBooks(code);
+        await this.backgroundJobsService.validateCronCode(code);
+        this.backgroundJobsService.deleteOldBooks();
     }
     async checkDiscountStatus(code) {
-        return this.backgroundJobsService.updateDiscountStatuses(code);
+        await this.backgroundJobsService.validateCronCode(code);
+        this.backgroundJobsService.updateDiscountStatuses();
+    }
+    async checkPaymentStatus(code) {
+        await this.backgroundJobsService.validateCronCode(code);
+        this.backgroundJobsService.checkPaymentStatuses();
+    }
+    async sendEmails(code) {
+        await this.backgroundJobsService.validateCronCode(code);
+        this.backgroundJobsService.sendEmails();
     }
 };
 exports.BackgroundJobsController = BackgroundJobsController;
@@ -41,6 +51,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BackgroundJobsController.prototype, "checkDiscountStatus", null);
+__decorate([
+    (0, common_1.Get)('/check-payment-statuses'),
+    __param(0, (0, common_1.Query)('code')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BackgroundJobsController.prototype, "checkPaymentStatus", null);
+__decorate([
+    (0, common_1.Get)('/send-emails'),
+    __param(0, (0, common_1.Query)('code')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BackgroundJobsController.prototype, "sendEmails", null);
 exports.BackgroundJobsController = BackgroundJobsController = __decorate([
     (0, common_1.Controller)('background-jobs'),
     __metadata("design:paramtypes", [background_jobs_service_1.BackgroundJobsService])

@@ -59,3 +59,15 @@ export interface FeesSplit {
     percentage_charge: string | number;
   };
 }
+
+export enum EmailTypeEnum {
+  CONTACT_US = 'contact_us',
+  PURCHASE = 'purchase',
+  OTHER = 'other',
+}
+
+export enum EmailStatusEnum {
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+}

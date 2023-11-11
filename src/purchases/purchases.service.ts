@@ -82,12 +82,18 @@ export class PurchasesService {
   // NOTE: limit the number of emails sent per cron execution to based on limits of the email provider.
 
   // verify a purchase
-  async verifyPurchasePayment(uniqueCode: string) {
-    const purchase = await this.manager.findOne(Purchase, {
-      where: {
-        code: uniqueCode,
-      },
-    });
+  async verifyPurchasePayment(uniqueCode: string, purchase?: Purchase | null) {
+    // check if the purchase exists and is the right type
+    if (!purchase || !(purchase instanceof Purchase)) {
+      if (!uniqueCode) {
+        return throwBadRequest('Purchase not found');
+      }
+      purchase = await this.manager.findOne(Purchase, {
+        where: {
+          code: uniqueCode,
+        },
+      });
+    }
     if (!purchase) {
       return throwBadRequest('Purchase not found');
     }

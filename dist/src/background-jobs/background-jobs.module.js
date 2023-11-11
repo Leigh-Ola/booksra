@@ -10,13 +10,15 @@ exports.BackgroundJobsModule = void 0;
 const common_1 = require("@nestjs/common");
 const background_jobs_controller_1 = require("./background-jobs.controller");
 const background_jobs_service_1 = require("./background-jobs.service");
+const purchases_module_1 = require("../purchases/purchases.module");
 let BackgroundJobsModule = class BackgroundJobsModule {
 };
 exports.BackgroundJobsModule = BackgroundJobsModule;
 exports.BackgroundJobsModule = BackgroundJobsModule = __decorate([
     (0, common_1.Module)({
+        imports: [purchases_module_1.PurchasesModule],
         controllers: [background_jobs_controller_1.BackgroundJobsController],
-        providers: [background_jobs_service_1.BackgroundJobsService]
+        providers: [background_jobs_service_1.BackgroundJobsService],
     })
 ], BackgroundJobsModule);
 //# sourceMappingURL=background-jobs.module.js.map

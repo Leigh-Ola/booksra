@@ -14,7 +14,7 @@ const sendMailInDev = async function ({
 }) {
   return new Promise(async (resolve, reject) => {
     // Using elastic email. Limit: 100 emails per day.
-    console.log(`Sending email to '${recipient}' in dev env...`);
+    console.log(`Sending email to '${recipient}' in dev/staging env...`);
     const apikey = process.env.ELASTIC_EMAIL_HTTP_PASSWORD;
     const baseurl = 'https://api.elasticemail.com';
     const path = '/v2/email/send';

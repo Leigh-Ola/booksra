@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Email = void 0;
 const typeorm_1 = require("typeorm");
+const types_1 = require("../utils/types");
 let Email = class Email {
 };
 exports.Email = Email;
@@ -23,21 +24,29 @@ __decorate([
     __metadata("design:type", String)
 ], Email.prototype, "ip", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: false }),
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: types_1.EmailTypeEnum,
+        default: types_1.EmailTypeEnum.OTHER,
+    }),
     __metadata("design:type", String)
-], Email.prototype, "name", void 0);
+], Email.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: false }),
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: types_1.EmailStatusEnum,
+        default: types_1.EmailStatusEnum.PENDING,
+    }),
     __metadata("design:type", String)
-], Email.prototype, "email", void 0);
+], Email.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
-    __metadata("design:type", String)
-], Email.prototype, "company", void 0);
+    (0, typeorm_1.Column)({ type: 'json', nullable: false }),
+    __metadata("design:type", Object)
+], Email.prototype, "data", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 2000, nullable: true }),
-    __metadata("design:type", String)
-], Email.prototype, "message", void 0);
+    (0, typeorm_1.Column)({ type: 'int2', default: 0 }),
+    __metadata("design:type", Number)
+], Email.prototype, "tries", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
         type: 'timestamp with time zone',

@@ -5,7 +5,7 @@ const axios_1 = require("axios");
 const nodeEnv = process.env.NODE_ENV || 'development';
 const sendMailInDev = async function ({ recipient, subject, body, }) {
     return new Promise(async (resolve, reject) => {
-        console.log(`Sending email to '${recipient}' in dev env...`);
+        console.log(`Sending email to '${recipient}' in dev/staging env...`);
         const apikey = process.env.ELASTIC_EMAIL_HTTP_PASSWORD;
         const baseurl = 'https://api.elasticemail.com';
         const path = '/v2/email/send';

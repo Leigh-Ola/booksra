@@ -48,3 +48,9 @@ rm -rf /app/.*
 git clone https://github.com/Leigh-Ola/booksra.git app
 cd app
 git checkout staging
+___
+GLITCH
+> git pull https://github.com/Leigh-Ola/booksra.git staging
+> refresh
+> npm run build
+> refresh
