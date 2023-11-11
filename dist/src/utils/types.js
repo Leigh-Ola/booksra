@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentStatusEnum = exports.DeliveryTypeEnum = exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.SortByPriceEnum = exports.BookCoversEnum = exports.MessageTypesEnum = exports.AppAccessLevelsEnum = void 0;
+exports.EmailStatusEnum = exports.EmailTypeEnum = exports.PaymentStatusEnum = exports.DeliveryTypeEnum = exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.SortByPriceEnum = exports.BookCoversEnum = exports.MessageTypesEnum = exports.AppAccessLevelsEnum = void 0;
 var AppAccessLevelsEnum;
 (function (AppAccessLevelsEnum) {
     AppAccessLevelsEnum["USER"] = "user";
@@ -52,4 +52,16 @@ var PaymentStatusEnum;
     PaymentStatusEnum["FAILED"] = "failed";
     PaymentStatusEnum["REVERSED"] = "reversed";
 })(PaymentStatusEnum || (exports.PaymentStatusEnum = PaymentStatusEnum = {}));
+var EmailTypeEnum;
+(function (EmailTypeEnum) {
+    EmailTypeEnum["CONTACT_US"] = "contact_us";
+    EmailTypeEnum["PURCHASE"] = "purchase";
+    EmailTypeEnum["OTHER"] = "other";
+})(EmailTypeEnum || (exports.EmailTypeEnum = EmailTypeEnum = {}));
+var EmailStatusEnum;
+(function (EmailStatusEnum) {
+    EmailStatusEnum["PENDING"] = "pending";
+    EmailStatusEnum["SUCCESS"] = "success";
+    EmailStatusEnum["FAILED"] = "failed";
+})(EmailStatusEnum || (exports.EmailStatusEnum = EmailStatusEnum = {}));
 //# sourceMappingURL=types.js.map

@@ -1,13 +1,14 @@
 import { EntityManager, DataSource } from 'typeorm';
 import { PaymentStatusEnum } from '../utils/types';
 import { CalculatePurchaseDto, NewPurchaseDto } from './dto/purchases.dto';
+import { Purchase } from '../purchases/purchase.entity';
 export declare class PurchasesService {
     private dbSource;
     manager: EntityManager;
     constructor(dbSource: DataSource);
     private getSplitPurchase;
     private verifyPurchase;
-    verifyPurchasePayment(uniqueCode: string): Promise<{
+    verifyPurchasePayment(uniqueCode: string, purchase?: Purchase | null): Promise<{
         customerEmail: string;
         status: string;
         amount: number;

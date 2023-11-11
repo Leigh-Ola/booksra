@@ -17,6 +17,7 @@ const message_entity_1 = require("./message.entity");
 const helpers_1 = require("../utils/helpers");
 const contact_us_1 = require("../mail/templates/contact-us");
 const mail_service_1 = require("../mail/mail.service");
+const types_1 = require("../utils/types");
 let MiscService = class MiscService {
     constructor(dbSource) {
         this.dbSource = dbSource;
@@ -38,15 +39,6 @@ let MiscService = class MiscService {
                 return (0, helpers_1.throwBadRequest)(`You have sent an email recently. Please wait ${emailMinInterval} minute(s) before sending another email.`);
             }
         }
-        const email = new email_entity_1.Email();
-        email.ip = ip;
-        email.name = body.name;
-        email.email = body.email;
-        email.message = body.message;
-        if (body.company) {
-            email.company = body.company;
-        }
-        await this.manager.save(email);
         const template = (0, contact_us_1.contactUsTemplate)({
             recipient: SITE_ADMIN_EMAIL,
             subject: 'A customer just sent you a message on your website',
@@ -57,9 +49,22 @@ let MiscService = class MiscService {
                 company: body.company || '',
             },
         });
-        (0, mail_service_1.sendMail)(template).catch((err) => {
-            console.log(err);
-        });
+        const email = new email_entity_1.Email();
+        email.ip = ip;
+        email.type = types_1.EmailTypeEnum.CONTACT_US;
+        email.data = {
+            recipient: template.recipient,
+            subject: template.subject,
+            body: template.body,
+        };
+        if (NODE_ENV !== 'production') {
+            console.log("Sending contact email immediately because we're in dev mode.");
+            email.status = types_1.EmailStatusEnum.SUCCESS;
+            (0, mail_service_1.sendMail)(template).catch((err) => {
+                console.log(err);
+            });
+        }
+        await this.manager.save(email);
         return;
     }
     async updateMessage(body) {

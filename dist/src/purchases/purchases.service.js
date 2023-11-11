@@ -65,12 +65,17 @@ let PurchasesService = class PurchasesService {
             });
         });
     }
-    async verifyPurchasePayment(uniqueCode) {
-        const purchase = await this.manager.findOne(purchase_entity_1.Purchase, {
-            where: {
-                code: uniqueCode,
-            },
-        });
+    async verifyPurchasePayment(uniqueCode, purchase) {
+        if (!purchase || !(purchase instanceof purchase_entity_1.Purchase)) {
+            if (!uniqueCode) {
+                return (0, helpers_1.throwBadRequest)('Purchase not found');
+            }
+            purchase = await this.manager.findOne(purchase_entity_1.Purchase, {
+                where: {
+                    code: uniqueCode,
+                },
+            });
+        }
         if (!purchase) {
             return (0, helpers_1.throwBadRequest)('Purchase not found');
         }
