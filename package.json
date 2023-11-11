@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "author": "",
+  "main": "dist/src/main.js",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
