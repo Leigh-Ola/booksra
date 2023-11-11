@@ -5,10 +5,11 @@ export declare class CreateUserDto {
     password: string;
     phone: string;
     address: string;
-    companyName: string;
+    companyName?: string;
     country: string;
     town: string;
     state: string;
+    zipCode: string;
 }
 export declare class UpdateUserDto {
     firstName?: string;
@@ -20,6 +21,7 @@ export declare class UpdateUserDto {
     country?: string;
     town?: string;
     state?: string;
+    zipCode?: string;
 }
 export declare class LoginUserDto {
     email: string;

@@ -1,5 +1,6 @@
 import { AppAccessLevelsEnum } from '../utils/types';
 import { ChangePassword } from './change-password.entity';
+import { Purchase } from '../purchases/purchase.entity';
 export declare class User {
     id: number;
     firstName: string;
@@ -14,6 +15,8 @@ export declare class User {
     country: string;
     town: string;
     state: string;
+    zipCode: string;
     role: AppAccessLevelsEnum;
     passwordToken: ChangePassword;
+    purchases: Purchase[];
 }

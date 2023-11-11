@@ -1,12 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeliveryTypeEnum = exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.SortByPriceEnum = exports.BookCoversEnum = exports.AppAccessLevelsEnum = void 0;
+exports.PaymentStatusEnum = exports.DeliveryTypeEnum = exports.CouponTypeEnum = exports.DiscountCategoryEnum = exports.DiscountTypeEnum = exports.SortByPriceEnum = exports.BookCoversEnum = exports.MessageTypesEnum = exports.AppAccessLevelsEnum = void 0;
 var AppAccessLevelsEnum;
 (function (AppAccessLevelsEnum) {
     AppAccessLevelsEnum["USER"] = "user";
     AppAccessLevelsEnum["ADMIN"] = "admin";
     AppAccessLevelsEnum["SUPERADMIN"] = "superadmin";
 })(AppAccessLevelsEnum || (exports.AppAccessLevelsEnum = AppAccessLevelsEnum = {}));
+var MessageTypesEnum;
+(function (MessageTypesEnum) {
+    MessageTypesEnum["BANNER"] = "banner_message";
+})(MessageTypesEnum || (exports.MessageTypesEnum = MessageTypesEnum = {}));
 var BookCoversEnum;
 (function (BookCoversEnum) {
     BookCoversEnum["HARDCOVER"] = "hardcover";
@@ -41,4 +45,11 @@ var DeliveryTypeEnum;
     DeliveryTypeEnum["PICKUP"] = "pickup";
     DeliveryTypeEnum["DELIVERY"] = "delivery";
 })(DeliveryTypeEnum || (exports.DeliveryTypeEnum = DeliveryTypeEnum = {}));
+var PaymentStatusEnum;
+(function (PaymentStatusEnum) {
+    PaymentStatusEnum["PENDING"] = "pending";
+    PaymentStatusEnum["SUCCESS"] = "success";
+    PaymentStatusEnum["FAILED"] = "failed";
+    PaymentStatusEnum["REVERSED"] = "reversed";
+})(PaymentStatusEnum || (exports.PaymentStatusEnum = PaymentStatusEnum = {}));
 //# sourceMappingURL=types.js.map

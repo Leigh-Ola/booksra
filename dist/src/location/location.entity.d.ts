@@ -1,3 +1,4 @@
+import { Purchase } from '../purchases/purchase.entity';
 export declare class Location {
     id: number;
     name: string;
@@ -6,4 +7,5 @@ export declare class Location {
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
+    purchases: Purchase[];
 }

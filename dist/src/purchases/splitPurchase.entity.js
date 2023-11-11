@@ -9,51 +9,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Location = void 0;
+exports.SplitPurchase = void 0;
 const typeorm_1 = require("typeorm");
 const purchase_entity_1 = require("../purchases/purchase.entity");
-let Location = class Location {
+let SplitPurchase = class SplitPurchase {
 };
-exports.Location = Location;
+exports.SplitPurchase = SplitPurchase;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Location.prototype, "id", void 0);
+], SplitPurchase.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: false, unique: true }),
-    __metadata("design:type", String)
-], Location.prototype, "name", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
-    __metadata("design:type", String)
-], Location.prototype, "description", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'numeric', nullable: false, precision: 10, scale: 2 }),
+    (0, typeorm_1.Column)({
+        type: 'numeric',
+        nullable: false,
+        precision: 14,
+        scale: 4,
+        default: 0,
+    }),
     __metadata("design:type", Number)
-], Location.prototype, "price", void 0);
+], SplitPurchase.prototype, "amount", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
         type: 'timestamp with time zone',
     }),
     __metadata("design:type", Date)
-], Location.prototype, "createdAt", void 0);
+], SplitPurchase.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({
-        type: 'timestamp with time zone',
-    }),
-    __metadata("design:type", Date)
-], Location.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({
-        type: 'timestamp with time zone',
-    }),
-    __metadata("design:type", Date)
-], Location.prototype, "deletedAt", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => purchase_entity_1.Purchase, (purchase) => purchase.location),
+    (0, typeorm_1.OneToMany)(() => purchase_entity_1.Purchase, (purchase) => purchase.splitPurchase),
     __metadata("design:type", Array)
-], Location.prototype, "purchases", void 0);
-exports.Location = Location = __decorate([
+], SplitPurchase.prototype, "purchases", void 0);
+exports.SplitPurchase = SplitPurchase = __decorate([
     (0, typeorm_1.Entity)()
-], Location);
-//# sourceMappingURL=location.entity.js.map
+], SplitPurchase);
+//# sourceMappingURL=splitPurchase.entity.js.map

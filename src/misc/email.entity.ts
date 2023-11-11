@@ -28,7 +28,7 @@ export class Email {
   company: string;
 
   // message. required
-  @Column({ type: 'varchar', length: 1000, nullable: false })
+  @Column({ type: 'varchar', length: 2000, nullable: true })
   message: string;
 
   @CreateDateColumn({

@@ -57,7 +57,9 @@ let LocationService = class LocationService {
         await this.manager.save(location_entity_1.Location, location);
     }
     async getLocations() {
-        return ((await this.manager.find(location_entity_1.Location))?.map((location) => {
+        return ((await this.manager.find(location_entity_1.Location, {
+            relations: ['purchases'],
+        }))?.map((location) => {
             return (0, lodash_1.pick)(location, ['id', 'name', 'description', 'price']);
         }) || []);
     }

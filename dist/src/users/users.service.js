@@ -54,6 +54,7 @@ let UserService = class UserService {
             'country',
             'town',
             'state',
+            'zipCode',
             'password',
         ]);
         if (typeof user.password === 'string' && user.password.length > 0) {
@@ -75,7 +76,10 @@ let UserService = class UserService {
     }
     async login(user) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email: user.email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            where: {
+                email: (0, typeorm_2.Raw)((em) => `LOWER(${em}) = LOWER('${user.email}')`),
+                password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()),
+            },
             select: ['id', 'password', 'email', 'role'],
         });
         if (!userExists) {
@@ -106,6 +110,7 @@ let UserService = class UserService {
                 ...(id && { id }),
                 ...(email && { email }),
             },
+            relations: ['purchases'],
         });
         if (!user) {
             return (0, helpers_1.throwBadRequest)('User does not exist');
@@ -121,6 +126,7 @@ let UserService = class UserService {
             'town',
             'state',
             'role',
+            'zipCode',
         ]);
     }
     async updateUser(id, user) {
@@ -144,16 +150,25 @@ let UserService = class UserService {
             'country',
             'town',
             'state',
+            'zipCode',
         ]);
         if (!Object.keys(user).length) {
             return;
         }
+        Object.keys(user).forEach((key) => {
+            if (user[key] === null || user[key] === undefined) {
+                delete user[key];
+            }
+        });
         await this.userRepository.update(id, user);
         return;
     }
     async sendPasswordToken(email) {
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email: email, password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            where: {
+                email: (0, typeorm_2.Raw)((em) => `LOWER(${em}) = LOWER('${email}')`),
+                password: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()),
+            },
             select: ['id', 'email'],
             relations: ['passwordToken'],
         });
@@ -161,6 +176,10 @@ let UserService = class UserService {
             return (0, helpers_1.throwBadRequest)('User does not exist');
         }
         const token = (0, helpers_1.generateRandomNumberString)(6);
+        const { NODE_ENV } = process.env;
+        if (NODE_ENV === 'development') {
+            console.log({ token });
+        }
         const encryptedToken = bcrypt.hashSync(token);
         const passwordTokenEntry = userExists.passwordToken;
         const template = (0, forgot_password_1.forgotPasswordTemplate)({
@@ -188,7 +207,9 @@ let UserService = class UserService {
             return (0, helpers_1.throwBadRequest)('Passwords do not match');
         }
         const userExists = await this.manager.findOne(user_entity_1.User, {
-            where: { email },
+            where: {
+                email: (0, typeorm_2.Raw)((em) => `LOWER(${em}) = LOWER('${email}')`),
+            },
             select: ['id'],
             relations: ['passwordToken'],
         });

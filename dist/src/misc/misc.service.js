@@ -13,6 +13,7 @@ exports.MiscService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("typeorm");
 const email_entity_1 = require("./email.entity");
+const message_entity_1 = require("./message.entity");
 const helpers_1 = require("../utils/helpers");
 const contact_us_1 = require("../mail/templates/contact-us");
 const mail_service_1 = require("../mail/mail.service");
@@ -60,6 +61,24 @@ let MiscService = class MiscService {
             console.log(err);
         });
         return;
+    }
+    async updateMessage(body) {
+        let message = await this.manager.findOne(message_entity_1.Message, {
+            where: { type: body.type },
+        });
+        if (!message) {
+            message = new message_entity_1.Message();
+            message.type = body.type;
+        }
+        message.message = body.message;
+        const savedMessage = await this.manager.save(message);
+        console.log(savedMessage);
+    }
+    async getMessage(type) {
+        const message = await this.manager.findOne(message_entity_1.Message, {
+            where: { type },
+        });
+        return message;
     }
 };
 exports.MiscService = MiscService;

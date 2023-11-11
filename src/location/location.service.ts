@@ -1,7 +1,6 @@
 // import required decorators
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager, In, ILike } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 // import entities
 import { Location } from './location.entity';
 // import dto
@@ -69,7 +68,11 @@ export class LocationService {
   // get all locations
   async getLocations() {
     return (
-      (await this.manager.find(Location))?.map((location) => {
+      (
+        await this.manager.find(Location, {
+          relations: ['purchases'],
+        })
+      )?.map((location) => {
         return pick(location, ['id', 'name', 'description', 'price']);
       }) || []
     );

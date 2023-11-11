@@ -13,7 +13,9 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Purchase } from '../purchases/purchase.entity';
 
 @Entity()
 export class Location {
@@ -44,4 +46,8 @@ export class Location {
     type: 'timestamp with time zone',
   })
   deletedAt: Date;
+
+  // purchases
+  @OneToMany(() => Purchase, (purchase) => purchase.location)
+  purchases: Purchase[];
 }
