@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CalculatePurchaseDto = void 0;
+exports.NewPurchaseDto = exports.CalculatePurchaseDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const types_1 = require("../../utils/types");
@@ -56,4 +56,40 @@ __decorate([
     (0, class_validator_1.IsNumberString)(),
     __metadata("design:type", String)
 ], CalculatePurchaseDto.prototype, "locationId", void 0);
+class NewPurchaseDto {
+}
+exports.NewPurchaseDto = NewPurchaseDto;
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMinSize)(1),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => BookDto),
+    __metadata("design:type", Array)
+], NewPurchaseDto.prototype, "books", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], NewPurchaseDto.prototype, "couponCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], NewPurchaseDto.prototype, "notes", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(types_1.DeliveryTypeEnum),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], NewPurchaseDto.prototype, "deliveryType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumberString)(),
+    __metadata("design:type", String)
+], NewPurchaseDto.prototype, "locationId", void 0);
+__decorate([
+    (0, class_validator_1.IsUrl)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], NewPurchaseDto.prototype, "callbackUrl", void 0);
 //# sourceMappingURL=purchases.dto.js.map

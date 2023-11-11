@@ -65,7 +65,7 @@ export class CreateUserDto {
   @IsOptional()
   @MinLength(3)
   @MaxLength(255)
-  companyName: string;
+  companyName?: string;
 
   @IsString()
   @IsOptional()
@@ -82,27 +82,36 @@ export class CreateUserDto {
   @IsOptional()
   @MaxLength(255)
   state: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @MaxLength(25)
+  zipCode: string;
 }
 
 export class UpdateUserDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(30)
   firstName?: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(30)
   lastName?: string;
 
+  @IsOptional()
   @IsEmail()
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(255)
   email?: string;
 
+  @IsOptional()
   @IsNumberString()
   @IsNotEmpty()
   @MinLength(8)
@@ -133,6 +142,11 @@ export class UpdateUserDto {
   @IsOptional()
   @MaxLength(255)
   state?: string;
+
+  @IsNumberString()
+  @IsOptional()
+  @MaxLength(25)
+  zipCode?: string;
 }
 
 export class LoginUserDto {

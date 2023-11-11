@@ -13,6 +13,7 @@ exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const types_1 = require("../utils/types");
 const change_password_entity_1 = require("./change-password.entity");
+const purchase_entity_1 = require("../purchases/purchase.entity");
 let User = class User {
 };
 exports.User = User;
@@ -73,6 +74,10 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "state", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "zipCode", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: types_1.AppAccessLevelsEnum,
@@ -84,6 +89,10 @@ __decorate([
     (0, typeorm_1.OneToOne)(() => change_password_entity_1.ChangePassword, (changePassword) => changePassword.user),
     __metadata("design:type", change_password_entity_1.ChangePassword)
 ], User.prototype, "passwordToken", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => purchase_entity_1.Purchase, (purchase) => purchase.user),
+    __metadata("design:type", Array)
+], User.prototype, "purchases", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)()
 ], User);

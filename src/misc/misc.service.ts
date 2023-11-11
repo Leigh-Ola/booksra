@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, DataSource } from 'typeorm';
-import { ContactMessageDto } from './dto/misc-dto';
+import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
 import { Email } from './email.entity';
+import { Message } from './message.entity';
 import { throwBadRequest } from '../utils/helpers';
 import { contactUsTemplate } from '../mail/templates/contact-us';
 import { sendMail } from '../mail/mail.service';
+import { MessageTypesEnum } from '../utils/types';
 
 @Injectable()
 export class MiscService {
@@ -60,5 +62,25 @@ export class MiscService {
       console.log(err);
     });
     return;
+  }
+
+  async updateMessage(body: UpdateMessageDto) {
+    let message = await this.manager.findOne(Message, {
+      where: { type: body.type },
+    });
+    if (!message) {
+      message = new Message();
+      message.type = body.type;
+    }
+    message.message = body.message;
+    const savedMessage = await this.manager.save(message);
+    console.log(savedMessage);
+  }
+
+  async getMessage(type: MessageTypesEnum) {
+    const message = await this.manager.findOne(Message, {
+      where: { type },
+    });
+    return message;
   }
 }

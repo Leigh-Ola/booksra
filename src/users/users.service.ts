@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager, Not, IsNull } from 'typeorm';
+import {
+  Repository,
+  DataSource,
+  EntityManager,
+  Raw,
+  Not,
+  IsNull,
+} from 'typeorm';
 import { User } from './user.entity';
 // import lodash function
 import { omit, pick } from 'lodash';
@@ -50,6 +57,7 @@ export class UserService {
       'country',
       'town',
       'state',
+      'zipCode',
       'password',
     ]) as Partial<User>;
     if (typeof user.password === 'string' && user.password.length > 0) {
@@ -73,7 +81,10 @@ export class UserService {
 
   async login(user: Partial<User>) {
     const userExists = await this.manager.findOne(User, {
-      where: { email: user.email, password: Not(IsNull()) },
+      where: {
+        email: Raw((em) => `LOWER(${em}) = LOWER('${user.email}')`),
+        password: Not(IsNull()),
+      },
       select: ['id', 'password', 'email', 'role'],
     });
     if (!userExists) {
@@ -109,6 +120,7 @@ export class UserService {
         ...(id && { id }),
         ...(email && { email }),
       },
+      relations: ['purchases'],
     });
     if (!user) {
       return throwBadRequest('User does not exist');
@@ -124,6 +136,7 @@ export class UserService {
       'town',
       'state',
       'role',
+      'zipCode',
     ]) as Partial<User>;
   }
 
@@ -148,17 +161,26 @@ export class UserService {
       'country',
       'town',
       'state',
+      'zipCode',
     ]) as Partial<User>;
     if (!Object.keys(user).length) {
       return;
     }
+    Object.keys(user).forEach((key) => {
+      if (user[key] === null || user[key] === undefined) {
+        delete user[key];
+      }
+    });
     await this.userRepository.update(id, user);
     return;
   }
 
   async sendPasswordToken(email: string) {
     const userExists = await this.manager.findOne(User, {
-      where: { email: email, password: Not(IsNull()) },
+      where: {
+        email: Raw((em) => `LOWER(${em}) = LOWER('${email}')`),
+        password: Not(IsNull()),
+      },
       select: ['id', 'email'],
       relations: ['passwordToken'],
     });
@@ -168,6 +190,10 @@ export class UserService {
 
     // get node env
     const token = generateRandomNumberString(6);
+    const { NODE_ENV } = process.env;
+    if (NODE_ENV === 'development') {
+      console.log({ token });
+    }
     // nodeEnv === 'production' ? generateRandomNumberString(6) : '000000';
     const encryptedToken = bcrypt.hashSync(token);
     const passwordTokenEntry = userExists.passwordToken;
@@ -206,7 +232,9 @@ export class UserService {
       return throwBadRequest('Passwords do not match');
     }
     const userExists = await this.manager.findOne(User, {
-      where: { email },
+      where: {
+        email: Raw((em) => `LOWER(${em}) = LOWER('${email}')`),
+      },
       select: ['id'],
       relations: ['passwordToken'],
     });

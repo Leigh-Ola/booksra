@@ -41,3 +41,10 @@ Make sure to replace the JWT_SECRET in the environment variables
 Make sure to replace the SITE_ADMIN_EMAIL in the environment variables
 Make sure to replace the NODE_ENV in the environment variables
 Make sure to setup background job environment variables and activate cronjob 
+___
+cd /
+rm -rf /app/*
+rm -rf /app/.*
+git clone https://github.com/Leigh-Ola/booksra.git app
+cd app
+git checkout staging

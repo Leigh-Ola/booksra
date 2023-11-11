@@ -10,4 +10,12 @@ export declare class CalculatePurchaseDto {
     deliveryType?: DeliveryTypeEnum;
     locationId?: string;
 }
+export declare class NewPurchaseDto {
+    books: BookDto[];
+    couponCode?: string;
+    notes?: string;
+    deliveryType: DeliveryTypeEnum;
+    locationId?: string;
+    callbackUrl: string;
+}
 export {};

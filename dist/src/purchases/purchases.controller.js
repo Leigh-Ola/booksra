@@ -29,6 +29,9 @@ let PurchasesController = class PurchasesController {
         const id = req.user.id;
         return this.purchasesService.createPurchase(data, id);
     }
+    async verifyPurchase(reference) {
+        return this.purchasesService.verifyPurchasePayment(reference);
+    }
 };
 exports.PurchasesController = PurchasesController;
 __decorate([
@@ -41,14 +44,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PurchasesController.prototype, "getGenre", null);
 __decorate([
-    (0, common_1.Post)('/create'),
+    (0, common_1.Post)('/new'),
     (0, common_1.UseGuards)(users_guard_1.IsUser),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, purchases_dto_1.CalculatePurchaseDto]),
+    __metadata("design:paramtypes", [Object, purchases_dto_1.NewPurchaseDto]),
     __metadata("design:returntype", Promise)
 ], PurchasesController.prototype, "createPurchase", null);
+__decorate([
+    (0, common_1.Get)('/verify/:reference'),
+    __param(0, (0, common_1.Param)('reference')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PurchasesController.prototype, "verifyPurchase", null);
 exports.PurchasesController = PurchasesController = __decorate([
     (0, common_1.Controller)('purchase'),
     __metadata("design:paramtypes", [purchases_service_1.PurchasesService])

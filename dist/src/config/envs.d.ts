@@ -13,6 +13,10 @@ declare const _default: (() => {
     ELASTIC_EMAIL_HTTP_PASSWORD: string;
     BACKGROUND_JOB_CODE: string;
     ALLOW_BACKGROUND_JOBS: string;
+    PAYMENT_SECRET_KEY: string;
+    SUBACCOUNT_CODE: string;
+    SELF_PAYMENT_PERCENTAGE: number;
+    SELF_PAYMENT_MONTHLY_MAX_AMOUNT: number;
     DB_TYPE: string;
     DB_HOST: string;
     DB_PORT: number;
@@ -43,6 +47,10 @@ declare const _default: (() => {
     ELASTIC_EMAIL_HTTP_PASSWORD: string;
     BACKGROUND_JOB_CODE: string;
     ALLOW_BACKGROUND_JOBS: string;
+    PAYMENT_SECRET_KEY: string;
+    SUBACCOUNT_CODE: string;
+    SELF_PAYMENT_PERCENTAGE: number;
+    SELF_PAYMENT_MONTHLY_MAX_AMOUNT: number;
     DB_TYPE: string;
     DB_HOST: string;
     DB_PORT: number;

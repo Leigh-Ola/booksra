@@ -1,6 +1,6 @@
 import {
   Controller,
-  Query,
+  Param,
   Get,
   Body,
   Post,
@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { PurchasesService } from './purchases.service';
 import { IsUser } from '../users/users-guard';
-import { CalculatePurchaseDto } from './dto/purchases.dto';
+import { CalculatePurchaseDto, NewPurchaseDto } from './dto/purchases.dto';
 
 @Controller('purchase')
 export class PurchasesController {
@@ -24,10 +24,16 @@ export class PurchasesController {
   }
 
   // create a purchase
-  @Post('/create')
+  @Post('/new')
   @UseGuards(IsUser)
-  async createPurchase(@Request() req, @Body() data: CalculatePurchaseDto) {
+  async createPurchase(@Request() req, @Body() data: NewPurchaseDto) {
     const id = req.user.id;
     return this.purchasesService.createPurchase(data, id);
+  }
+
+  // verify a purchase
+  @Get('/verify/:reference')
+  async verifyPurchase(@Param('reference') reference: string) {
+    return this.purchasesService.verifyPurchasePayment(reference);
   }
 }

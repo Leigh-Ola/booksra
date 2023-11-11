@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContactMessageDto = void 0;
+exports.UpdateMessageDto = exports.ContactMessageDto = void 0;
 const class_validator_1 = require("class-validator");
+const types_1 = require("../../utils/types");
 class ContactMessageDto {
 }
 exports.ContactMessageDto = ContactMessageDto;
@@ -35,9 +36,27 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(1000, {
-        message: 'Please limit your message to 1000 characters.',
+    (0, class_validator_1.MinLength)(20, {
+        message: 'Please enter at least 20 characters.',
+    }),
+    (0, class_validator_1.MaxLength)(2000, {
+        message: 'Please limit your message to 2000 characters.',
     }),
     __metadata("design:type", String)
 ], ContactMessageDto.prototype, "message", void 0);
+class UpdateMessageDto {
+}
+exports.UpdateMessageDto = UpdateMessageDto;
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(10000),
+    __metadata("design:type", String)
+], UpdateMessageDto.prototype, "message", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEnum)(types_1.MessageTypesEnum),
+    __metadata("design:type", String)
+], UpdateMessageDto.prototype, "type", void 0);
 //# sourceMappingURL=misc-dto.js.map

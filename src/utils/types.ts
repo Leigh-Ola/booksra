@@ -4,6 +4,10 @@ export enum AppAccessLevelsEnum {
   SUPERADMIN = 'superadmin',
 }
 
+export enum MessageTypesEnum {
+  BANNER = 'banner_message',
+}
+
 export enum BookCoversEnum {
   HARDCOVER = 'hardcover',
   PAPERBACK = 'paperback',
@@ -36,4 +40,22 @@ export enum CouponTypeEnum {
 export enum DeliveryTypeEnum {
   PICKUP = 'pickup',
   DELIVERY = 'delivery',
+}
+
+export enum PaymentStatusEnum {
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  REVERSED = 'reversed',
+}
+
+export interface FeesSplit {
+  paystack: number;
+  integration: number | string;
+  subaccount: number;
+  params: {
+    bearer: string;
+    transaction_charge: string | number;
+    percentage_charge: string | number;
+  };
 }
