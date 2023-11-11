@@ -51,6 +51,8 @@ git checkout staging
 ___
 GLITCH
 > git pull https://github.com/Leigh-Ola/booksra.git staging
+>>? npm run run:db:migrations
 > refresh
 > npm run build
+>>? npm run start:dev
 > refresh
