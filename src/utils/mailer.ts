@@ -1,41 +1,66 @@
 import axios from 'axios';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodemailer = require('nodemailer');
 // get node env
 const nodeEnv = process.env.NODE_ENV || 'development';
 
+const sendMailInProd = async function ({
+  recipient,
+  subject,
+  body,
+}: {
+  recipient: string;
+  subject: string;
+  body: string;
+}) {
+  return new Promise(async (resolve, reject) => {
+    console.log(nodemailer);
+    const transport = nodemailer.createTransport({
+      name: 'web-hosting.com',
+      host: 'business105.web-hosting.com',
+      port: 465, // 587,
+      secure: true, // true for 465, false for other ports
+      // ssl should be enabled
+      auth: {
+        user: 'noreply@booksroundabout.com',
+        pass: 'S2AbQ.-3-U3GrN9',
+      },
+      // tls: {
+      //   rejectUnauthorized: true,
+      // },
+    });
+
+    const mailOptions = {
+      from: 'noreply@booksroundabout.com',
+      to: recipient,
+      subject: subject,
+      html: body,
+    };
+
+    transport.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+        reject('An error occured while sending email');
+      } else {
+        console.log(info);
+        console.log('YAY!');
+        console.log(info.response);
+        resolve('Email sent successfully');
+      }
+    });
+  });
+};
 const sendMail = async function () {
-  //   return new Promise(async (resolve, reject) => {
-  //     // Using elastic email. Limit: 100 emails per day.
-  //     console.log('Email test...');
-  //     const apikey = process.env.ELASTIC_EMAIL_HTTP_PASSWORD;
-  //     const baseurl = 'https://api.elasticemail.com';
-  //     const path = '/v2/email/status';
-  //     const url = `${baseurl}${path}`;
-  //     const data = {
-  //       apikey: apikey,
-  //       messageID: 'KYNFsvQrM-Mq8Ca5QOt0Zw2',
-  //     };
-  //     /**
-  //  * data: {
-  //     transactionid: '9b171167-2b55-4130-8067-8a765118238e',
-  //     messageid: 'KYNFsvQrM-Mq8Ca5QOt0Zw2'
-  //   }
-  //  */
-  //     await axios
-  //       .get(url, { params: data })
-  //       .then((res) => {
-  //         const success = res?.data?.success || false;
-  //         if (!success) {
-  //           console.log(res.data);
-  //           reject('An error occured while sending email');
-  //         } else {
-  //           console.log(res.data);
-  //           resolve('Email sent successfully');
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //         reject('An error occured while initiating outgoing email');
-  //       });
+  // sendMailInProd({
+  //   recipient: 'leolaotan@gmail.com',
+  //   subject: 'Thank you for working out with us',
+  //   body: 'This is a test email.<br/><br/><br/>Thanks,<br/>Books Roundabout.<br/><br/><br/><p style="color: red;">You are the best</p>',
+  // })
+  //   .then((res) => {
+  //     console.log(res);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
   //   });
 };
 

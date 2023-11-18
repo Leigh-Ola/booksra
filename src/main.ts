@@ -22,13 +22,13 @@ async function bootstrap() {
   const appConfig = getAppConfig();
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
-  let logger: Logger | undefined = undefined;
-  if (appConfig.NODE_ENV === 'production') {
-    logger = app.get(Logger);
-    app.useLogger(logger);
-  }
+  const logger: Logger | undefined = undefined;
+  // if (appConfig.NODE_ENV === 'production') {
+  //   logger = app.get(Logger);
+  //   app.useLogger(logger);
+  // }
 
-  app.flushLogs();
+  // app.flushLogs();
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -58,7 +58,7 @@ async function bootstrap() {
   }
 
   await app.listen(
-    process.env.PORT || process.env.SERVER_PORT || '3000',
+    process.env.PORT || process.env.SERVER_PORT || '8080',
     process.env.HOST || process.env.SERVER_HOST || '0.0.0.0',
   );
 

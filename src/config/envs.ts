@@ -17,7 +17,7 @@ const getAppConfig = () => {
 
     SERVER_URL: String(processEnvObj.SERVER_URL).toLowerCase(),
     SERVER_HOST: processEnvObj.SERVER_HOST,
-    SERVER_PORT: parseInt(processEnvObj.SERVER_PORT || '80') || 80,
+    SERVER_PORT: parseInt(processEnvObj.SERVER_PORT || '8080') || 8080,
     APP_KEY: processEnvObj.APP_KEY,
     JWT_SECRET: processEnvObj.JWT_SECRET,
     JWT_EXPIRY: processEnvObj.JWT_EXPIRY || '8h',
@@ -27,6 +27,8 @@ const getAppConfig = () => {
       parseInt(String(processEnvObj.EMAIL_MIN_INTERVAL), 5) || 5,
 
     ELASTIC_EMAIL_HTTP_PASSWORD: processEnvObj.ELASTIC_EMAIL_HTTP_PASSWORD,
+    EMAIL_SENDER_USERNAME: processEnvObj.EMAIL_SENDER_USERNAME,
+    EMAIL_SENDER_PASSWORD: processEnvObj.EMAIL_SENDER_PASSWORD,
 
     BACKGROUND_JOB_CODE: processEnvObj.BACKGROUND_JOB_CODE,
     ALLOW_BACKGROUND_JOBS: processEnvObj.ALLOW_BACKGROUND_JOBS,
