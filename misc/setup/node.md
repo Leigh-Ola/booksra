@@ -99,3 +99,51 @@ npm ERR! This is probably not a problem with npm. There is likely additional log
 npm ERR! A complete log of this run can be found in:
 npm ERR!     /home/bookxcuj/.npm/_logs/2023-11-04T07_34_59_333Z-debug.log
 ```
+
+AFTER SWITCHING TO ^nest@9.0.0":
+```
+returncode: 243
+stdout:
+> booksra@0.0.1 xyz /home/bookxcuj/booksra
+> npm i -g @nestjs/cli@9.4.0
+stderr:
+npm WARN checkPermissions Missing write access to /opt/alt/alt-nodejs14/root/usr/lib/node_modules
+npm WARN notsup Unsupported engine for @angular-devkit/core@16.0.1: wanted: {"node":"^16.14.0 || >=18.10.0","npm":"^6.11.0 || ^7.5.6 || >=8.0.0","yarn":">= 1.13.0"} (current: {"node":"14.21.2","npm":"6.14.17"})
+npm WARN notsup Not compatible with your version of node/npm: @angular-devkit/core@16.0.1
+npm WARN notsup Unsupported engine for @angular-devkit/schematics@16.0.1: wanted: {"node":"^16.14.0 || >=18.10.0","npm":"^6.11.0 || ^7.5.6 || >=8.0.0","yarn":">= 1.13.0"} (current: {"node":"14.21.2","npm":"6.14.17"})
+npm WARN notsup Not compatible with your version of node/npm: @angular-devkit/schematics@16.0.1
+npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@~2.3.2 (node_modules/@nestjs/cli/node_modules/chokidar/node_modules/fsevents):
+npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@2.3.3: wanted {"os":"darwin","arch":"any"} (current: {"os":"linux","arch":"x64"})
+npm WARN ajv-keywords@3.5.2 requires a peer of ajv@^6.9.1 but none is installed. You must install peer dependencies yourself.
+
+npm ERR! code EACCES
+npm ERR! syscall access
+npm ERR! path /opt/alt/alt-nodejs14/root/usr/lib/node_modules
+npm ERR! errno -13
+npm ERR! Error: EACCES: permission denied, access '/opt/alt/alt-nodejs14/root/usr/lib/node_modules'
+npm ERR!  [Error: EACCES: permission denied, access '/opt/alt/alt-nodejs14/root/usr/lib/node_modules'] {
+npm ERR!   errno: -13,
+npm ERR!   code: 'EACCES',
+npm ERR!   syscall: 'access',
+npm ERR!   path: '/opt/alt/alt-nodejs14/root/usr/lib/node_modules'
+npm ERR! }
+npm ERR! 
+npm ERR! The operation was rejected by your operating system.
+npm ERR! It is likely you do not have the permissions to access this file as the current user
+npm ERR! 
+npm ERR! If you believe this might be a permissions issue, please double-check the
+npm ERR! permissions of the file and its containing directories, or try running
+npm ERR! the command again as root/Administrator.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/bookxcuj/.npm/_logs/2023-11-17T09_07_30_986Z-debug.log
+npm ERR! code ELIFECYCLE
+npm ERR! errno 243
+npm ERR! booksra@0.0.1 xyz: `npm i -g @nestjs/cli@9.4.0`
+npm ERR! Exit status 243
+npm ERR! 
+npm ERR! Failed at the booksra@0.0.1 xyz script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/bookxcuj/.npm/_logs/2023-11-17T09_07_31_037Z-debug.log```

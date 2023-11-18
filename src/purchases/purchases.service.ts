@@ -148,25 +148,17 @@ export class PurchasesService {
       // if the paymentStatus is pending, change it to failed
       if (purchase.paymentStatus === PaymentStatusEnum.PENDING) {
         purchase.paymentStatus = PaymentStatusEnum.FAILED;
-        // decrease the book quantities in the database
-        const bookIds = [
-          ...new Set(purchase.booksData.map((book) => toNumber(book.bookId))),
-        ];
-        const books = await this.manager.find(Book, {
-          where: {
-            id: In(bookIds),
-          },
-          select: ['id', 'amountInStock'],
-        });
-        if (books && books.length) {
-          books.forEach((book) => {
-            const bookQuantity = toNumber(
-              purchase.booksData.find((b) => toNumber(b.bookId) === book.id)
-                ?.quantity,
-            );
-            book.amountInStock += bookQuantity;
-          });
-          await this.manager.save(Book, books);
+        // increase the book quantities in the database
+        for await (const bookData of purchase.booksData) {
+          await this.manager
+            .createQueryBuilder()
+            .update(Book)
+            .set({
+              amountInStock: () => `amount_in_stock + :quantity`,
+            })
+            .where({ id: bookData.bookId })
+            .setParameter('quantity', bookData.quantity)
+            .execute();
         }
         wasPurchaseUpdated = true;
       }

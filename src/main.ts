@@ -10,6 +10,7 @@ import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { sendMail } from '../src/utils/mailer';
 
 async function bootstrap() {
+  console.log('wtf...');
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // rawBody: true,
     rawBody: false,
@@ -21,6 +22,7 @@ async function bootstrap() {
 
   const appConfig = getAppConfig();
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
+  console.log('hmm...');
 
   let logger: Logger | undefined = undefined;
   if (appConfig.NODE_ENV === 'production') {
@@ -58,7 +60,7 @@ async function bootstrap() {
   }
 
   await app.listen(
-    process.env.PORT || process.env.SERVER_PORT || '3000',
+    '8080',
     process.env.HOST || process.env.SERVER_HOST || '0.0.0.0',
   );
 

@@ -94,21 +94,39 @@ export class BackgroundJobsService {
 
   // check payment statuses
   async checkPaymentStatuses() {
-    // delete the purchases that are older than 7 days and have not been paid
+    // delete the purchases that are older than 24 hours and have not been paid
     const purchasesToDelete = await this.manager.find(Purchase, {
       where: {
         paymentStatus: PaymentStatusEnum.PENDING,
-        updatedAt: Raw((alias) => `${alias} < NOW() - INTERVAL '7 days'`),
+        updatedAt: Raw((alias) => `${alias} < NOW() - INTERVAL '24 hours'`),
       },
     });
     if (purchasesToDelete?.length) {
+      // undo the stock changes
+      for await (const purchase of purchasesToDelete) {
+        const booksData = purchase.booksData;
+        if (!booksData?.length) {
+          continue;
+        }
+        for await (const bookData of booksData) {
+          await this.manager
+            .createQueryBuilder()
+            .update(Book)
+            .set({
+              amountInStock: () => `amount_in_stock + :quantity`,
+            })
+            .where({ id: bookData.bookId })
+            .setParameter('quantity', bookData.quantity)
+            .execute();
+        }
+      }
       await this.manager.remove(purchasesToDelete);
     }
-    // find pending purchases less than 3 days old.
+    // find pending purchases less than 24 hours old.
     let purchases = await this.manager.find(Purchase, {
       where: {
         paymentStatus: PaymentStatusEnum.PENDING,
-        updatedAt: Raw((alias) => `${alias} > NOW() - INTERVAL '3 days'`),
+        updatedAt: Raw((alias) => `${alias} > NOW() - INTERVAL '24 hours'`),
       },
       // sorted from newest to oldest
       order: {
@@ -126,12 +144,17 @@ export class BackgroundJobsService {
     for await (const purchase of purchases) {
       await this.purchasesService
         .verifyPurchasePayment(null, purchase)
-        .catch((err) => {});
+        .catch(() => {});
     }
   }
 
   // send Emails
   async sendEmails() {
+    // delete emails that are over 7 days old and have failed
+    await this.manager.delete(Email, {
+      status: EmailStatusEnum.FAILED,
+      updatedAt: Raw((alias) => `${alias} < NOW() - INTERVAL '7 days'`),
+    });
     // find all emails that have not been sent
     const emails = await this.manager.find(Email, {
       where: {
@@ -145,6 +168,7 @@ export class BackgroundJobsService {
     if (!emails?.length) {
       return;
     }
+
     // send each email
     for await (const email of emails) {
       await sendMail(email.data)

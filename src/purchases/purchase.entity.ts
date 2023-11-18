@@ -76,9 +76,6 @@ export class Purchase {
   @Column({ type: 'varchar', nullable: true })
   paymentAccessCode: string;
 
-  @Column({ type: 'boolean', nullable: false, default: false })
-  emailSent: boolean;
-
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
