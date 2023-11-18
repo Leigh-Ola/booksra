@@ -10,7 +10,11 @@ import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { sendMail } from '../src/utils/mailer';
 
 async function bootstrap() {
-  console.log('one...');
+  console.log({
+    PORT: process.env.PORT,
+    SERVER_PORT: process.env.SERVER_PORT,
+    using: process.env.PORT || process.env.SERVER_PORT || '8080',
+  });
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // rawBody: true,
     rawBody: false,
@@ -22,22 +26,19 @@ async function bootstrap() {
 
   const appConfig = getAppConfig();
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
-  console.log('two...');
 
-  let logger: Logger | undefined = undefined;
-  if (appConfig.NODE_ENV === 'production') {
-    logger = app.get(Logger);
-    app.useLogger(logger);
-  }
+  const logger: Logger | undefined = undefined;
+  // if (appConfig.NODE_ENV === 'production') {
+  //   logger = app.get(Logger);
+  //   app.useLogger(logger);
+  // }
 
-  app.flushLogs();
-  console.log('three...');
+  // app.flushLogs();
 
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  console.log('four...');
 
   app.enableCors({
     allowedHeaders: '*',
@@ -45,10 +46,8 @@ async function bootstrap() {
     methods: '*',
     exposedHeaders: ['NEW_AUTH_TOKEN'],
   });
-  console.log('five...');
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  console.log('six...');
   if (appConfig.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle(`${appConfig.PROJECT_NAME} API`)
@@ -63,13 +62,11 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  console.log('seven...');
   await app.listen(
     process.env.PORT || process.env.SERVER_PORT || '8080',
     process.env.HOST || process.env.SERVER_HOST || '0.0.0.0',
   );
 
-  console.log('eight...');
   const msg = `Application is running on: ${await app.getUrl()}`;
   logger ? logger.log(msg) : console.log(msg);
 }
