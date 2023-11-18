@@ -3,6 +3,7 @@ import axios from 'axios';
 const nodemailer = require('nodemailer');
 // get node env
 const nodeEnv = process.env.NODE_ENV || 'development';
+const { EMAIL_SENDER_PASSWORD, EMAIL_SENDER_USERNAME } = process.env;
 
 const sendMailInProd = async function ({
   recipient,
@@ -22,8 +23,8 @@ const sendMailInProd = async function ({
       secure: true, // true for 465, false for other ports
       // ssl should be enabled
       auth: {
-        user: 'noreply@booksroundabout.com',
-        pass: 'S2AbQ.-3-U3GrN9',
+        user: EMAIL_SENDER_USERNAME,
+        pass: EMAIL_SENDER_PASSWORD,
       },
       // tls: {
       //   rejectUnauthorized: true,
