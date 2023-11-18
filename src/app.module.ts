@@ -16,6 +16,10 @@ import { LocationService } from './location/location.service';
 import { LocationController } from './location/location.controller';
 import { LocationModule } from './location/location.module';
 import { MiscModule } from './misc/misc.module';
+import { BackgroundJobsModule } from './background-jobs/background-jobs.module';
+import { PurchasesService } from './purchases/purchases.service';
+import { PurchasesController } from './purchases/purchases.controller';
+import { PurchasesModule } from './purchases/purchases.module';
 
 const processClassValidatorErrors = (
   errors: ValidationError[],
@@ -87,8 +91,10 @@ const validator = new ValidationPipe({
     DiscountModule,
     LocationModule,
     MiscModule,
+    BackgroundJobsModule,
+    PurchasesModule,
   ],
-  controllers: [AppController, EntityController, LocationController],
+  controllers: [AppController, EntityController, LocationController, PurchasesController],
   providers: [
     AppService,
     EntityService,
@@ -97,6 +103,7 @@ const validator = new ValidationPipe({
       useValue: validator,
     },
     LocationService,
+    PurchasesService,
   ],
 })
 export class AppModule {}

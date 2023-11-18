@@ -36,7 +36,7 @@ export class CreateBookDto {
   @IsOptional()
   @IsString()
   @MinLength(3)
-  @MaxLength(255)
+  @MaxLength(2555)
   description?: string;
 
   // cover
@@ -105,7 +105,7 @@ export class UpdateBookDto {
   @IsOptional()
   @IsString()
   @MinLength(3)
-  @MaxLength(255)
+  @MaxLength(2555)
   description?: string;
 
   // cover

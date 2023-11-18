@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, DataSource } from 'typeorm';
-import { ContactMessageDto } from './dto/misc-dto';
+import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
 import { Email } from './email.entity';
+import { Message } from './message.entity';
 import { throwBadRequest } from '../utils/helpers';
 import { contactUsTemplate } from '../mail/templates/contact-us';
 import { sendMail } from '../mail/mail.service';
+import {
+  MessageTypesEnum,
+  EmailTypeEnum,
+  EmailStatusEnum,
+} from '../utils/types';
 
 @Injectable()
 export class MiscService {
@@ -35,17 +41,7 @@ export class MiscService {
         );
       }
     }
-    // create a new email
-    const email = new Email();
-    email.ip = ip;
-    email.name = body.name;
-    email.email = body.email;
-    email.message = body.message;
-    if (body.company) {
-      email.company = body.company;
-    }
-    await this.manager.save(email);
-    // send email
+    // create a new email template
     const template = contactUsTemplate({
       recipient: SITE_ADMIN_EMAIL,
       subject: 'A customer just sent you a message on your website',
@@ -56,9 +52,47 @@ export class MiscService {
         company: body.company || '',
       },
     });
-    sendMail(template).catch((err) => {
-      console.log(err);
-    });
+    // create a new email record
+    const email = new Email();
+    email.ip = ip;
+    email.type = EmailTypeEnum.CONTACT_US;
+    email.data = {
+      recipient: template.recipient,
+      subject: template.subject,
+      body: template.body,
+    };
+    // send the email
+    if (NODE_ENV !== 'production') {
+      console.log(
+        "Sending contact email immediately because we're in dev mode.",
+      );
+      email.status = EmailStatusEnum.SUCCESS;
+      sendMail(template).catch((err) => {
+        console.log(err);
+      });
+    }
+    // save the email record
+    await this.manager.save(email);
     return;
+  }
+
+  async updateMessage(body: UpdateMessageDto) {
+    let message = await this.manager.findOne(Message, {
+      where: { type: body.type },
+    });
+    if (!message) {
+      message = new Message();
+      message.type = body.type;
+    }
+    message.message = body.message;
+    const savedMessage = await this.manager.save(message);
+    console.log(savedMessage);
+  }
+
+  async getMessage(type: MessageTypesEnum) {
+    const message = await this.manager.findOne(Message, {
+      where: { type },
+    });
+    return message;
   }
 }

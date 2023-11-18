@@ -39,3 +39,26 @@ Make sure to create sendMailInProduction functions in the mailer.service.ts file
 Make sure to replace db config in the environment variables
 Make sure to replace the JWT_SECRET in the environment variables
 Make sure to replace the SITE_ADMIN_EMAIL in the environment variables
+Make sure to replace the SUBACCOUNT_CODE and PAYMENT_SECRET_KEY in the environment variables
+Make sure to replace the NODE_ENV in the environment variables
+Make sure to setup background job environment variables and activate cronjob 
+___
+cd /
+rm -rf /app/*
+rm -rf /app/.*
+git clone https://github.com/Leigh-Ola/booksra.git app
+cd app
+git checkout staging
+___
+GLITCH
+> git pull https://github.com/Leigh-Ola/booksra.git staging
+> refresh
+>>? npm run run:db:migrations
+> npm run build
+>>? npm run start:dev
+> refresh
+~~~ If Merge Conflict, Override ~~~
+git merge --abort
+git fetch origin staging
+git reset --hard origin/staging
+

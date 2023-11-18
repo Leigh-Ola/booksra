@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { EmailTypeEnum, EmailStatusEnum } from '../utils/types';
 
 @Entity()
 export class Email {
@@ -15,21 +16,32 @@ export class Email {
   @Column({ type: 'varchar', length: 255, nullable: true })
   ip: string;
 
-  // name. required
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  name: string;
+  // type (enum)
+  @Column({
+    type: 'enum',
+    enum: EmailTypeEnum,
+    default: EmailTypeEnum.OTHER,
+  })
+  type: EmailTypeEnum;
 
-  // email. required
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  email: string;
+  // status (enum)
+  @Column({
+    type: 'enum',
+    enum: EmailStatusEnum,
+    default: EmailStatusEnum.PENDING,
+  })
+  status: EmailStatusEnum;
 
-  // company
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  company: string;
+  @Column({ type: 'json', nullable: false })
+  data: {
+    recipient: string;
+    subject: string;
+    body: string;
+  };
 
-  // message. required
-  @Column({ type: 'varchar', length: 1000, nullable: false })
-  message: string;
+  // retries (default 0)
+  @Column({ type: 'int2', default: 0 })
+  tries: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',

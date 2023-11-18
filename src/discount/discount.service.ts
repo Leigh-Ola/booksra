@@ -138,6 +138,17 @@ export class DiscountService {
         discount.couponCode = String(discountDto.couponCode).toLowerCase();
       }
     }
+    // validate global discount
+    else if (discountDto.category === DiscountCategoryEnum.GLOBAL) {
+      // if the discount is global, the coupon type and coupon min value should be null
+      if (discountDto.couponType) {
+        return throwBadRequest(
+          'Coupon type should be null for global discounts',
+        );
+      }
+      // set the coupon type to minimum price
+      discount.couponType = CouponTypeEnum.MINIMUM_PRICE;
+    }
     // create discount
     const newDiscount = await this.manager.create(
       Discount,
@@ -278,6 +289,15 @@ export class DiscountService {
         } else {
           discount.couponCode = String(discountDto.couponCode).toLowerCase();
         }
+      }
+    }
+    // validate global discount
+    else if (discountExists.category === DiscountCategoryEnum.GLOBAL) {
+      // if the discount is global, the coupon type and coupon min value should be null
+      if (discountDto.couponType) {
+        return throwBadRequest(
+          'You cannot change the coupon type for global discounts',
+        );
       }
     }
     // create discount

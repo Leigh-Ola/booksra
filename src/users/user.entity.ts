@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { AppAccessLevelsEnum } from '../utils/types';
 import { ChangePassword } from './change-password.entity';
+import { Purchase } from '../purchases/purchase.entity';
 
 @Entity()
 export class User {
@@ -63,6 +65,10 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true })
   state: string;
 
+  // zip code
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  zipCode: string;
+
   // role
   @Column({
     type: 'enum',
@@ -74,4 +80,7 @@ export class User {
   // relations
   @OneToOne(() => ChangePassword, (changePassword) => changePassword.user)
   passwordToken: ChangePassword;
+
+  @OneToMany(() => Purchase, (purchase) => purchase.user)
+  purchases: Purchase[];
 }
