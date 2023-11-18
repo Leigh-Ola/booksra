@@ -10,11 +10,6 @@ import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { sendMail } from '../src/utils/mailer';
 
 async function bootstrap() {
-  console.log({
-    PORT: process.env.PORT,
-    SERVER_PORT: process.env.SERVER_PORT,
-    using: process.env.PORT || process.env.SERVER_PORT || '8080',
-  });
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // rawBody: true,
     rawBody: false,
