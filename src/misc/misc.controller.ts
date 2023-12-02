@@ -6,10 +6,12 @@ import {
   Get,
   Query,
   HttpStatus,
+  UseGuards,
   UseInterceptors,
   UploadedFile,
   ParseFilePipeBuilder,
 } from '@nestjs/common';
+import { IsAdminUser } from '../users/users-guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MiscService } from './misc.service';
 import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
@@ -26,6 +28,7 @@ export class MiscController {
   }
 
   @Post('/message')
+  @UseGuards(IsAdminUser)
   async updateMessage(@Body() body: UpdateMessageDto) {
     return this.miscService.updateMessage(body);
   }
@@ -36,6 +39,7 @@ export class MiscController {
   }
 
   @Post('/upload-image')
+  @UseGuards(IsAdminUser)
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(
     @UploadedFile(
