@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 // get node env
 const nodeEnv = process.env.NODE_ENV || 'development';
 const { EMAIL_SENDER_PASSWORD, EMAIL_SENDER_USERNAME } = process.env;
+import { purchaseCompleteTemplate } from '../mail/templates/purchase-complete';
 
 const sendMailInProd = async function ({
   recipient,
@@ -15,7 +16,6 @@ const sendMailInProd = async function ({
   body: string;
 }) {
   return new Promise(async (resolve, reject) => {
-    console.log(nodemailer);
     const transport = nodemailer.createTransport({
       name: 'web-hosting.com',
       host: 'business105.web-hosting.com',
@@ -52,10 +52,42 @@ const sendMailInProd = async function ({
   });
 };
 const sendMail = async function () {
+  const data = purchaseCompleteTemplate(
+    {
+      recipient: 'leolaotan@gmail.com',
+      subject: 'Thank you for working out with us',
+      data: {
+        items: [
+          {
+            name: 'Merlin',
+            code: 'KOF',
+            quantity: 2,
+          },
+          {
+            name: '',
+            code: 'HRP',
+            quantity: 1,
+          },
+        ],
+        notes: 'No notes',
+        userName: 'John Doe',
+        userEmail: 'john@doe.com',
+        userPhoneNumber: '',
+        isDelivery: true,
+        deliveryLocation: 'The White House',
+        basePrice: '35000',
+        paidPrice: '33000',
+        isDiscountApplied: true,
+      },
+    },
+    true,
+  );
+  // console.log(data);
   // sendMailInProd({
-  //   recipient: 'leolaotan@gmail.com',
-  //   subject: 'Thank you for working out with us',
-  //   body: 'This is a test email.<br/><br/><br/>Thanks,<br/>Books Roundabout.<br/><br/><br/><p style="color: red;">You are the best</p>',
+  //   // recipient: 'leolaotan@gmail.com',
+  //   // subject: 'Thank you for working out with us',
+  //   // body: 'This is a test email.<br/><br/><br/>Thanks,<br/>Books Roundabout.<br/><br/><br/><p style="color: red;">You are the best</p>',
+  //   ...data,
   // })
   //   .then((res) => {
   //     console.log(res);

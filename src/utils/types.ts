@@ -71,3 +71,12 @@ export enum EmailStatusEnum {
   SUCCESS = 'success',
   FAILED = 'failed',
 }
+
+export enum ImageTypes {
+  IMAGE_PNG = 'image/png',
+  IMAGE_JPG = 'image/jpg',
+  IMAGE_JPGEG = 'image/jpeg',
+  IMAGE_WEBP = 'image/webp',
+  IMAGE_HEIF = 'image/heif',
+  IMAGE_TIFF = 'image/tiff',
+}

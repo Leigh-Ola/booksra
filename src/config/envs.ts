@@ -40,6 +40,10 @@ const getAppConfig = () => {
     SELF_PAYMENT_MONTHLY_MAX_AMOUNT:
       parseInt(processEnvObj.SELF_PAYMENT_MONTHLY_MAX_AMOUNT, 10) || 400000,
 
+    AWS_KEY: processEnvObj.AWS_KEY,
+    AWS_SECRET: processEnvObj.AWS_SECRET,
+    AWS_BUCKET_NAME: processEnvObj.AWS_BUCKET_NAME,
+
     DB_TYPE: processEnvObj.DB_TYPE,
     DB_HOST: processEnvObj.DB_HOST,
     DB_PORT: parseInt(processEnvObj.DB_PORT),

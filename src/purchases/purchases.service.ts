@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, DataSource, In, Raw } from 'typeorm';
 import { throwBadRequest } from '../utils/helpers';
-import { PaymentStatusEnum, FeesSplit } from '../utils/types';
+import {
+  PaymentStatusEnum,
+  FeesSplit,
+  EmailStatusEnum,
+  EmailTypeEnum,
+} from '../utils/types';
 import { CalculatePurchaseDto, NewPurchaseDto } from './dto/purchases.dto';
 import { Book } from '../books/book.entity';
 import { User } from '../users/user.entity';
@@ -10,7 +15,7 @@ import { Location } from '../location/location.entity';
 import { Purchase } from '../purchases/purchase.entity';
 import { SplitPurchase } from '../purchases/splitPurchase.entity';
 import { generateRandomString } from '../utils/helpers';
-import { toNumber, multiply, divide, subtract, max, add } from 'lodash';
+import { toNumber, multiply, divide, subtract, max, add, pick } from 'lodash';
 import {
   DiscountTypeEnum,
   DiscountCategoryEnum,
@@ -19,6 +24,8 @@ import {
 } from '../utils/types';
 import axios from 'axios';
 import { Email } from '../misc/email.entity';
+import { purchaseCompleteTemplate } from '../mail/templates/purchase-complete';
+import { sendMail } from '../mail/mail.service';
 
 @Injectable()
 export class PurchasesService {
@@ -71,15 +78,8 @@ export class PurchasesService {
     });
   }
 
-  // TODO: every 5ish minutes, send emails to users with paid purchases (up to the final price) that have not been sent an email yet
-  // inform them that after the first week, for every day they delay, they will be charged a fee of 500 naira.
-  // and we cant guarantee that the books will be available after 2 weeks of not picking them up
-  // TODO: every 7ish minutes send email to admin with
-  // include the gift name if the user used a gift coupon
-  // include user address and delivery location if the user selected delivery
-  // include user phone number and email
-  // NOTE: consider making it the same email with the same template, but with different recipients?
-  // NOTE: limit the number of emails sent per cron execution to based on limits of the email provider.
+  // TODO: include the gift name if the user used a gift coupon
+  // TODO: limit the number of emails sent per cron execution to based on limits of the email provider.
 
   // verify a purchase
   async verifyPurchasePayment(uniqueCode: string, purchase?: Purchase | null) {
@@ -91,6 +91,10 @@ export class PurchasesService {
       purchase = await this.manager.findOne(Purchase, {
         where: {
           code: uniqueCode,
+        },
+        relations: {
+          user: true,
+          location: true,
         },
       });
     }
@@ -134,17 +138,22 @@ export class PurchasesService {
         if (purchase.paidAmount >= finalPrice) {
           purchase.paymentStatus = PaymentStatusEnum.SUCCESS;
         }
-        const paidToSelfRaw = Number(fees_split?.integration);
-        if (!isNaN(paidToSelfRaw)) {
-          const paidToSelf = Number(divide(paidToSelfRaw, 100).toFixed(4));
-          // update the split purchase
-          const splitPurchase = await this.getSplitPurchase();
-          splitPurchase.amount = add(Number(splitPurchase.amount), paidToSelf);
-          await this.manager.save(SplitPurchase, splitPurchase);
-        }
+
+        await this.sendPurchaseEmails(purchase).catch((err) => {
+          console.log('Error sending purchase emails:', err);
+        });
+        // NOTE: only required for split payments
+        // const paidToSelfRaw = Number(fees_split?.integration);
+        // if (!isNaN(paidToSelfRaw)) {
+        //   const paidToSelf = Number(divide(paidToSelfRaw, 100).toFixed(4));
+        //   // update the split purchase
+        //   // const splitPurchase = await this.getSplitPurchase();
+        //   // splitPurchase.amount = add(Number(splitPurchase.amount), paidToSelf);
+        //   // await this.manager.save(SplitPurchase, splitPurchase);
+        // }
         wasPurchaseUpdated = true;
       }
-    } else if (status === 'failed') {
+    } else if (status === PaymentStatusEnum.FAILED) {
       // if the paymentStatus is pending, change it to failed
       if (purchase.paymentStatus === PaymentStatusEnum.PENDING) {
         purchase.paymentStatus = PaymentStatusEnum.FAILED;
@@ -215,6 +224,93 @@ export class PurchasesService {
     };
   }
 
+  private async sendPurchaseEmails(purchase: Purchase) {
+    const { SITE_ADMIN_EMAIL, NODE_ENV } = process.env;
+    const bookIds = [
+      ...new Set(purchase.booksData.map((book) => toNumber(book.bookId))),
+    ];
+    const books = await this.manager.find(Book, {
+      where: {
+        id: In(bookIds),
+      },
+      select: ['id', 'title', 'code'],
+      withDeleted: true,
+    });
+    const purchaseBooksDataItems = books.map((book) => {
+      return {
+        name: book.title,
+        code: book.code,
+        quantity: toNumber(
+          purchase.booksData.find((b) => toNumber(b.bookId) === book.id)
+            ?.quantity,
+        ),
+      };
+    });
+    const userName = `${purchase.user?.firstName || ''} ${
+      purchase.user?.lastName || ''
+    }`.trim();
+    // create emails
+    const templateToUser = purchaseCompleteTemplate(
+      {
+        recipient: purchase.user.email,
+        subject: 'Booksroundabout Purchase Confirmation',
+        data: {
+          items: purchaseBooksDataItems,
+          notes: purchase.notes,
+          userName: userName || '',
+          userEmail: purchase.user.email,
+          userPhoneNumber: purchase.user.phone,
+          isDelivery: purchase.isDelivery,
+          deliveryLocation: purchase.location?.name,
+          basePrice: purchase.basePrice,
+          paidPrice: purchase.paidAmount,
+          isDiscountApplied: purchase.isDiscountApplied,
+        },
+      },
+      true,
+    );
+    const templateToAdmin = purchaseCompleteTemplate(
+      {
+        recipient: SITE_ADMIN_EMAIL,
+        subject: 'Booksroundabout Purchase Confirmation',
+        data: {
+          items: purchaseBooksDataItems,
+          notes: purchase.notes,
+          userName: userName || '',
+          userEmail: purchase.user.email,
+          userPhoneNumber: purchase.user.phone,
+          userAddress: purchase.user.address,
+          isDelivery: purchase.isDelivery,
+          deliveryLocation: purchase.location?.name,
+          basePrice: purchase.basePrice,
+          paidPrice: purchase.paidAmount,
+          isDiscountApplied: purchase.isDiscountApplied,
+        },
+      },
+      false,
+    );
+
+    for (const template of [templateToUser, templateToAdmin]) {
+      const email = new Email();
+      email.type = EmailTypeEnum.PURCHASE;
+      email.data = {
+        recipient: template.recipient,
+        subject: template.subject,
+        body: template.body,
+      };
+      if (NODE_ENV !== 'production') {
+        console.log(
+          "Sending contact email immediately because we're in dev mode.",
+        );
+        email.status = EmailStatusEnum.SUCCESS;
+        sendMail(template).catch((err) => {
+          console.log(err);
+        });
+      }
+      await this.manager.save(email);
+    }
+  }
+
   /**
  * finalPrice: 13,000 || 1,300,000
  * {
@@ -252,26 +348,22 @@ if splitPurchase for the month is 399,999.00:
     email,
     amount,
     callbackUrl,
-    subaccount,
-    amountForMainAccount,
   }: {
     email: string;
     amount: number;
     callbackUrl: string;
-    subaccount: string | null;
-    amountForMainAccount: number | null;
   }): Promise<{
     reference: string;
     access_code: string;
     authorization_url: string;
   }> | null {
-    console.log({
-      email,
-      amount,
-      callbackUrl,
-      subaccount,
-      amountForMainAccount,
-    });
+    // console.log({
+    //   email,
+    //   amount,
+    //   callbackUrl,
+    //   // subaccount,
+    //   // amountForMainAccount,
+    // });
     return new Promise((resolve, reject) => {
       const { PAYMENT_SECRET_KEY } = process.env;
       axios
@@ -281,9 +373,10 @@ if splitPurchase for the month is 399,999.00:
             email: email,
             amount: multiply(amount, 100),
             callback_url: callbackUrl,
-            subaccount,
-            bearer: 'subaccount',
-            transaction_charge: multiply(amountForMainAccount, 100),
+            // NOTE: only required for split payments
+            // subaccount,
+            // bearer: 'subaccount',
+            // transaction_charge: multiply(amountForMainAccount, 100),
             // if provided, transaction_charge is the fixed amount that will be sent to the main account
             // regardless of any preset amount.
           },
@@ -295,7 +388,7 @@ if splitPurchase for the month is 399,999.00:
           },
         )
         .then((response) => {
-          console.log('success');
+          // console.log('success');
           resolve(response.data?.data);
         })
         .catch((error) => {
@@ -308,13 +401,13 @@ if splitPurchase for the month is 399,999.00:
 
   // create a purchase
   async createPurchase(data: NewPurchaseDto, userId: number) {
-    const {
-      SUBACCOUNT_CODE,
-      SELF_PAYMENT_MONTHLY_MAX_AMOUNT: selfPaymentMonthlyMaxAmount_,
-      SELF_PAYMENT_PERCENTAGE: selfPaymentPercentage_,
-    } = process.env;
-    const selfPaymentMonthlyMaxAmount = Number(selfPaymentMonthlyMaxAmount_);
-    const selfPaymentPercentage = Number(selfPaymentPercentage_);
+    // const {
+    //   SUBACCOUNT_CODE,
+    //   SELF_PAYMENT_MONTHLY_MAX_AMOUNT: selfPaymentMonthlyMaxAmount_,
+    //   SELF_PAYMENT_PERCENTAGE: selfPaymentPercentage_,
+    // } = process.env;
+    // const selfPaymentMonthlyMaxAmount = Number(selfPaymentMonthlyMaxAmount_);
+    // const selfPaymentPercentage = Number(selfPaymentPercentage_);
     // ensure that the user exists.
     const user = await this.manager.findOne(User, {
       where: {
@@ -351,24 +444,25 @@ if splitPurchase for the month is 399,999.00:
     let isError = false;
     const uniqueCode = generateRandomString(12);
 
-    const splitPurchase = await this.getSplitPurchase();
-    const splitPurchaseAmount = Number(splitPurchase.amount);
-    let amountForMainAccount = Number(
-      multiply(finalPrice, selfPaymentPercentage / 100).toFixed(4),
-    ); // if selfPaymentPercentage is 5, then amountForMainAccount is 5% of the final price
-    if (splitPurchaseAmount + finalPrice > selfPaymentMonthlyMaxAmount) {
-      amountForMainAccount = max([
-        subtract(selfPaymentMonthlyMaxAmount, splitPurchaseAmount),
-        0,
-      ]);
-    }
+    // NOTE: only required for split payments
+    // const splitPurchase = await this.getSplitPurchase();
+    // const splitPurchaseAmount = Number(splitPurchase.amount);
+    // let amountForMainAccount = Number(
+    //   multiply(finalPrice, selfPaymentPercentage / 100).toFixed(4),
+    // ); // if selfPaymentPercentage is 5, then amountForMainAccount is 5% of the final price
+    // if (splitPurchaseAmount + finalPrice > selfPaymentMonthlyMaxAmount) {
+    //   amountForMainAccount = max([
+    //     subtract(selfPaymentMonthlyMaxAmount, splitPurchaseAmount),
+    //     0,
+    //   ]);
+    // }
 
     const purchaseData = await this.initiatePurchase({
       email: user.email,
       amount: finalPrice,
       callbackUrl: `${data.callbackUrl}?code=${uniqueCode}`,
-      subaccount: SUBACCOUNT_CODE,
-      amountForMainAccount,
+      // subaccount: SUBACCOUNT_CODE,
+      // amountForMainAccount,
     }).catch((error) => {
       isError = true;
       return throwBadRequest(error);
@@ -403,7 +497,8 @@ if splitPurchase for the month is 399,999.00:
     // create the purchase
     const purchase = {
       user,
-      ...(amountForMainAccount > 0 && { splitPurchase }),
+      // NOTE: only required for split payments
+      // ...(amountForMainAccount > 0 && { splitPurchase }),
       code: uniqueCode,
       booksData: data.books.map((book) => ({
         bookId: toNumber(book.bookId),
@@ -597,22 +692,34 @@ if splitPurchase for the month is 399,999.00:
 
     // apply the delivery fee if needed
     let deliveryPrice = 0;
+    let deliveryLocationName = null;
+    let user: User;
     if (data.deliveryType === DeliveryTypeEnum.DELIVERY) {
       const location = await this.manager.findOne(Location, {
         where: {
           id: toNumber(data.locationId),
         },
-        select: ['price'],
+        select: ['price', 'name'],
       });
       if (!location) {
         return throwBadRequest('The location you provided is invalid');
       }
+      deliveryLocationName = location.name;
       // ensure the user has an address and phone number in order to use delivery
-      const user = await this.manager.findOne(User, {
+      user = await this.manager.findOne(User, {
         where: {
           id: userId,
         },
-        select: ['address', 'state', 'town', 'country', 'phone'],
+        select: [
+          'address',
+          'state',
+          'town',
+          'country',
+          'phone',
+          'email',
+          'firstName',
+          'lastName',
+        ],
       });
       if (!user || !userId) {
         return throwBadRequest('User not found');
@@ -631,11 +738,11 @@ if splitPurchase for the month is 399,999.00:
       }
     } else if (data.deliveryType === DeliveryTypeEnum.PICKUP) {
       // ensure the user has a phone number in order to use pickup
-      const user = await this.manager.findOne(User, {
+      user = await this.manager.findOne(User, {
         where: {
           id: userId,
         },
-        select: ['phone', 'email'],
+        select: ['phone', 'email', 'firstName', 'lastName'],
       });
       if (!user || !userId) {
         return throwBadRequest('User not found');
@@ -657,7 +764,7 @@ if splitPurchase for the month is 399,999.00:
     // greater than 0 and less than 100 million
     if (
       !(
-        deliveryPrice > 0 &&
+        deliveryPrice >= 0 &&
         deliveryPrice < 100_000_000 &&
         booksPrice > 0 &&
         booksPrice < 100_000_000 &&
@@ -675,6 +782,8 @@ if splitPurchase for the month is 399,999.00:
     return {
       data: {
         bookIds,
+        books: books.map((book) => pick(book, ['id', 'title', 'code'])),
+        user: pick(user, ['firstName', 'lastName', 'email', 'phone']),
         totalBookCopiesCount: data.books.reduce(
           (acc, book) => acc + toNumber(book.quantity),
           0,
@@ -683,6 +792,7 @@ if splitPurchase for the month is 399,999.00:
         isDiscountApplied,
         booksOnSaleCount,
         isDelivery: data.deliveryType === DeliveryTypeEnum.DELIVERY,
+        deliveryLocation: deliveryLocationName,
         deliveryPrice,
       },
       finalPrice,

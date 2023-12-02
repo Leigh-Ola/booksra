@@ -7,12 +7,18 @@ export const throwUnauthorized = (message: string) => {
   throw new HttpException(message, HttpStatus.UNAUTHORIZED);
 };
 // function to generate random string of length n
-export const generateRandomString = (n: number) => {
+export const generateRandomString = (
+  n: number,
+  addTimestampPrefix: boolean = false,
+) => {
   const chars =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let token = '';
   for (let i = 0; i < n; i++) {
     token += chars[Math.floor(Math.random() * chars.length)];
+  }
+  if (addTimestampPrefix) {
+    token = new Date().getTime() + token;
   }
   return token;
 };

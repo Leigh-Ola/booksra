@@ -10,7 +10,10 @@ import {
   MessageTypesEnum,
   EmailTypeEnum,
   EmailStatusEnum,
+  ImageTypes,
 } from '../utils/types';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+const { AWS_KEY, AWS_SECRET, AWS_BUCKET_NAME } = process.env;
 
 @Injectable()
 export class MiscService {
@@ -76,6 +79,7 @@ export class MiscService {
     return;
   }
 
+  // update message (ie., banner message)
   async updateMessage(body: UpdateMessageDto) {
     let message = await this.manager.findOne(Message, {
       where: { type: body.type },
@@ -85,14 +89,65 @@ export class MiscService {
       message.type = body.type;
     }
     message.message = body.message;
-    const savedMessage = await this.manager.save(message);
-    console.log(savedMessage);
+    await this.manager.save(message);
   }
 
+  // get message (ie., banner message)
   async getMessage(type: MessageTypesEnum) {
     const message = await this.manager.findOne(Message, {
       where: { type },
     });
     return message;
+  }
+
+  private renameFileWithTimestamp(name) {
+    const date = new Date();
+    const timestamp = date.getTime();
+    const extension = name.split('.').pop();
+    const nameStart = name.split('.').slice(0, -1).join('.');
+    const newName = `${timestamp}-${nameStart}.${extension}`;
+    return newName;
+  }
+
+  // upload image file to aws
+  async uploadImage(file: any) {
+    // ensure the mimetype is in ImageTypes
+    if (!Object.values(ImageTypes).includes(file.mimetype)) {
+      return throwBadRequest('Invalid file type');
+    }
+    const client = new S3Client({
+      region: 'eu-west-3',
+      credentials: {
+        accessKeyId: AWS_KEY,
+        secretAccessKey: AWS_SECRET,
+      },
+    });
+
+    const newFileName = this.renameFileWithTimestamp(file.originalname);
+
+    const command = new PutObjectCommand({
+      Bucket: AWS_BUCKET_NAME,
+      Key: newFileName,
+      Body: Buffer.from(file.buffer),
+      ContentType: file.mimetype,
+      ACL: 'public-read',
+    });
+
+    let response;
+    await client
+      .send(command)
+      .then(() => {
+        const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${newFileName}`;
+        response = {
+          message: 'Upload Success',
+          url,
+        };
+      })
+      .catch((err) => {
+        const errToShow = err && err.message ? err.message : err;
+        console.log(err);
+        throwBadRequest(errToShow);
+      });
+    return response;
   }
 }
