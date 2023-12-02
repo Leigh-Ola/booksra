@@ -63,7 +63,7 @@ export class IsAdminUser implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
     } catch (e) {
-      throw new UnauthorizedException('Authentication failed');
+      throw new UnauthorizedException('Access Denied.');
     }
     return true;
   }
@@ -95,7 +95,7 @@ export class IsSuperAdminUser implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
     } catch (e) {
-      throw new UnauthorizedException('Authentication failed');
+      throw new UnauthorizedException('Access Denied.');
     }
     return true;
   }
