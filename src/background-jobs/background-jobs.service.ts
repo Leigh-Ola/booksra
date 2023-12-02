@@ -132,6 +132,10 @@ export class BackgroundJobsService {
       order: {
         updatedAt: 'DESC',
       },
+      relations: {
+        user: true,
+        location: true,
+      },
       // limit to 20 purchases
       take: 20,
     });

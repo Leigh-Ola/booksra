@@ -1,7 +1,20 @@
-import { Controller, Post, Body, Ip, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Ip,
+  Get,
+  Query,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipeBuilder,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MiscService } from './misc.service';
 import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
 import { MessageTypesEnum } from '../utils/types';
+import { Express } from 'express';
 
 @Controller()
 export class MiscController {
@@ -20,5 +33,28 @@ export class MiscController {
   @Get('/message')
   async getMessage(@Query('type') type: MessageTypesEnum) {
     return this.miscService.getMessage(type);
+  }
+
+  @Post('/upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png|heif|tiff|webp)$/i,
+        })
+        .addMaxSizeValidator({
+          // Checks if a given file's size is less than the provided value (measured in bytes)
+          // max size should be 10mb
+          maxSize: 10 * 1024 * 1024,
+          message: 'Image must be less than 10mb',
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.miscService.uploadImage(file);
   }
 }
