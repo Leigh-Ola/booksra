@@ -54,6 +54,7 @@ GLITCH
 > git pull https://github.com/Leigh-Ola/booksra.git staging
 > refresh
 >>? npm run run:db:migrations
+>>? npm install
 > npm run build
 >>? npm run start:dev
 > refresh

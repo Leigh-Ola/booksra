@@ -104,7 +104,11 @@ export class MiscService {
     const date = new Date();
     const timestamp = date.getTime();
     const extension = name.split('.').pop();
-    const nameStart = name.split('.').slice(0, -1).join('.');
+    const nameStart = name
+      .split('.')
+      .slice(0, -1)
+      .join('.')
+      .replace(/\s+/g, '-');
     const newName = `${timestamp}-${nameStart}.${extension}`;
     return newName;
   }
