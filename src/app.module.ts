@@ -20,6 +20,7 @@ import { BackgroundJobsModule } from './background-jobs/background-jobs.module';
 import { PurchasesService } from './purchases/purchases.service';
 import { PurchasesController } from './purchases/purchases.controller';
 import { PurchasesModule } from './purchases/purchases.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const processClassValidatorErrors = (
   errors: ValidationError[],
@@ -65,6 +66,7 @@ const validator = new ValidationPipe({
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -94,7 +96,12 @@ const validator = new ValidationPipe({
     BackgroundJobsModule,
     PurchasesModule,
   ],
-  controllers: [AppController, EntityController, LocationController, PurchasesController],
+  controllers: [
+    AppController,
+    EntityController,
+    LocationController,
+    PurchasesController,
+  ],
   providers: [
     AppService,
     EntityService,

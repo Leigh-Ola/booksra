@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { EntityManager, DataSource, Raw, LessThan, Any } from 'typeorm';
 import { throwBadRequest } from '../utils/helpers';
 import { Book } from '../books/book.entity';
@@ -9,8 +10,14 @@ import { PurchasesService } from '../purchases/purchases.service';
 import { PaymentStatusEnum, EmailStatusEnum } from '../utils/types';
 import { sendMail } from '../mail/mail.service';
 
+const isBackgroundServiceEnabled = () => {
+  const { ALLOW_BACKGROUND_JOBS } = process.env;
+  return String(ALLOW_BACKGROUND_JOBS) === 'true';
+};
+
 @Injectable()
 export class BackgroundJobsService {
+  private readonly logger = new Logger(BackgroundJobsService.name);
   manager: EntityManager;
   constructor(
     private dbSource: DataSource,
@@ -30,6 +37,10 @@ export class BackgroundJobsService {
   }
 
   // delete books that havent been updated in 30 days and (have no stock OR are soft-deleted)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
+    name: 'delete-old-books',
+    disabled: !isBackgroundServiceEnabled(),
+  })
   async deleteOldBooks() {
     let books = await this.manager.find(Book, {
       where: {
@@ -57,6 +68,10 @@ export class BackgroundJobsService {
   }
 
   // update isActve for discounts based on their start and end dates and their current status
+  @Cron(CronExpression.EVERY_HOUR, {
+    name: 'update-discount-statuses',
+    disabled: !isBackgroundServiceEnabled(),
+  })
   async updateDiscountStatuses() {
     const discounts = await this.manager.find(Discount);
 
@@ -93,6 +108,10 @@ export class BackgroundJobsService {
   }
 
   // check payment statuses
+  @Cron(CronExpression.EVERY_5_MINUTES, {
+    name: 'check-payment-statuses',
+    disabled: !isBackgroundServiceEnabled(),
+  })
   async checkPaymentStatuses() {
     // delete the purchases that are older than 24 hours and have not been paid
     const purchasesToDelete = await this.manager.find(Purchase, {
@@ -153,6 +172,10 @@ export class BackgroundJobsService {
   }
 
   // send Emails
+  @Cron(CronExpression.EVERY_10_MINUTES, {
+    name: 'send-emails',
+    disabled: !isBackgroundServiceEnabled(),
+  })
   async sendEmails() {
     // delete emails that are over 7 days old and have failed
     await this.manager.delete(Email, {
@@ -188,5 +211,16 @@ export class BackgroundJobsService {
     }
     // save the emails
     this.manager.save(Email, emails);
+  }
+
+  // @Cron('*/10 * * * * *', {
+  @Cron(CronExpression.EVERY_QUARTER, {
+    name: 'test-cron',
+    disabled: !isBackgroundServiceEnabled(),
+  })
+  async testCron() {
+    this.logger.debug('[logger.debug] Called every quarter-year');
+    console.log('[console.log] Called every quarter-year');
+    return { success: true };
   }
 }
