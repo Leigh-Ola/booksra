@@ -32,4 +32,11 @@ export class BackgroundJobsController {
     await this.backgroundJobsService.validateCronCode(code);
     this.backgroundJobsService.sendEmails();
   }
+
+  // just to test
+  @Get('/test')
+  async testCronJobs(@Query('code') code: string) {
+    await this.backgroundJobsService.validateCronCode(code);
+    return await this.backgroundJobsService.testCron();
+  }
 }
