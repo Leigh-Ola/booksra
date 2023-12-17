@@ -219,8 +219,7 @@ export class BackgroundJobsService {
     disabled: !isBackgroundServiceEnabled(),
   })
   async testCron() {
-    this.logger.debug('[logger.debug] Called every quarter-year');
-    console.log('[console.log] Called every quarter-year');
-    return { success: true };
+    this.logger.log('[logger.debug] Called every quarter-year');
+    return { success: true, environment: process.env.NODE_ENV };
   }
 }
