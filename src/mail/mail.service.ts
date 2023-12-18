@@ -4,7 +4,6 @@ import axios from 'axios';
 const nodemailer = require('nodemailer');
 // get node env
 const nodeEnv = process.env.NODE_ENV || 'development';
-const { EMAIL_SENDER_PASSWORD, EMAIL_SENDER_USERNAME } = process.env;
 
 const sendMailInDev = async function ({
   recipient,
@@ -61,6 +60,7 @@ const sendMailInProd = async function ({
   body: string;
 }) {
   return new Promise(async (resolve, reject) => {
+    const { EMAIL_SENDER_PASSWORD, EMAIL_SENDER_USERNAME } = process.env;
     const transport = nodemailer.createTransport({
       name: 'web-hosting.com',
       host: 'business105.web-hosting.com',
@@ -95,6 +95,7 @@ const sendMailInProd = async function ({
   });
 };
 
+const sendMailInDevelopment = sendMailInDev;
 const sendMailInStaging = sendMailInDev;
 const sendMailInProduction = sendMailInProd;
 
@@ -117,7 +118,7 @@ const sendMail = async function ({
           reject(`Error sending email: ${err}`);
         });
     } else if (nodeEnv === 'development') {
-      sendMailInDev({ recipient, subject, body })
+      sendMailInDevelopment({ recipient, subject, body })
         .then(() => {
           resolve('Sent email successfully');
         })
