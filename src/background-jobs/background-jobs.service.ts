@@ -132,7 +132,7 @@ export class BackgroundJobsService {
             .createQueryBuilder()
             .update(Book)
             .set({
-              amountInStock: () => `amount_in_stock + :quantity`,
+              amountInStock: () => `amountInStock + :quantity`,
             })
             .where({ id: bookData.bookId })
             .setParameter('quantity', bookData.quantity)
