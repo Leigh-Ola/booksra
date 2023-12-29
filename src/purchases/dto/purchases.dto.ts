@@ -8,9 +8,11 @@ import {
   ValidateNested,
   ArrayMinSize,
   IsUrl,
+  IsBooleanString,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { DeliveryTypeEnum } from '../../utils/types';
+import { DeliveryTypeEnum, PaymentStatusEnum } from '../../utils/types';
 
 class BookDto {
   @IsNotEmpty()
@@ -74,4 +76,48 @@ export class NewPurchaseDto {
   @IsUrl()
   @IsNotEmpty()
   callbackUrl: string;
+}
+
+export class GetPurchasesDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  code?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  paymentReference?: string;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  userId?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  locationId?: string;
+
+  @IsOptional()
+  @IsBooleanString()
+  isDelivery?: boolean;
+
+  @IsOptional()
+  @IsBooleanString()
+  isDiscountApplied?: boolean;
+
+  @IsOptional()
+  @IsEnum(PaymentStatusEnum)
+  paymentStatus?: PaymentStatusEnum;
+
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
 }

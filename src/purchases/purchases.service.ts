@@ -7,7 +7,11 @@ import {
   EmailStatusEnum,
   EmailTypeEnum,
 } from '../utils/types';
-import { CalculatePurchaseDto, NewPurchaseDto } from './dto/purchases.dto';
+import {
+  CalculatePurchaseDto,
+  NewPurchaseDto,
+  GetPurchasesDto,
+} from './dto/purchases.dto';
 import { Book } from '../books/book.entity';
 import { User } from '../users/user.entity';
 import { Discount } from '../discount/discount.entity';
@@ -32,6 +36,91 @@ export class PurchasesService {
   manager: EntityManager;
   constructor(private dbSource: DataSource) {
     this.manager = this.dbSource.manager;
+  }
+
+  async getAllPurchases(query: GetPurchasesDto) {
+    const {
+      page: page_,
+      limit: limit_,
+      date,
+      userId,
+      locationId,
+      ...filters
+    } = query;
+    if (filters?.isDiscountApplied) {
+      filters.isDiscountApplied =
+        String(filters.isDiscountApplied).toLowerCase() === 'true';
+    }
+    if (filters?.isDelivery) {
+      filters.isDelivery = String(filters.isDelivery).toLowerCase() === 'true';
+    }
+    const where = {
+      ...filters,
+    };
+    let page = Number(page_) || 1;
+    let limit = Number(limit_) || 10;
+    page = page < 1 ? 1 : page;
+    limit = limit < 1 ? 1 : limit > 100 ? 100 : limit;
+    if (date) {
+      // Purchase.createdAt must matchthe day, month and year of the date provided
+      const dateObj = new Date(date);
+      const day = dateObj.getDate();
+      const month = dateObj.getMonth() + 1; // JavaScript months are 0-11
+      const year = dateObj.getFullYear();
+      where['createdAt'] = Raw(
+        (alias) =>
+          `EXTRACT(DAY FROM ${alias}) = :day AND EXTRACT(MONTH FROM ${alias}) = :month AND EXTRACT(YEAR FROM ${alias}) = :year`,
+        { day, month, year },
+      );
+    }
+    if (userId) {
+      where['user'] = {
+        id: userId,
+      };
+    }
+    if (locationId) {
+      where['location'] = {
+        id: locationId,
+      };
+    }
+    let purchases = await this.manager.find(Purchase, {
+      where,
+      relations: {
+        user: true,
+        location: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    purchases = purchases.map((p) => {
+      const purchase = pick(p, [
+        'id',
+        'code',
+        'booksData',
+        'notes',
+        'createdAt',
+        'updatedAt',
+        'isDelivery',
+        'paidAmount',
+        'paymentStatus',
+        'paymentReference',
+        'user',
+        'location',
+      ]);
+      purchase.user = pick(purchase.user, [
+        'email',
+        'firstName',
+        'lastName',
+      ]) as unknown as User;
+      purchase.location = pick(purchase.location, [
+        'name',
+      ]) as unknown as Location;
+      return purchase;
+    }) as unknown as Purchase[];
+    return purchases;
   }
 
   // find, else create split purchase for (createdAt) this month and year, and return it
@@ -163,7 +252,7 @@ export class PurchasesService {
             .createQueryBuilder()
             .update(Book)
             .set({
-              amountInStock: () => `amount_in_stock + :quantity`,
+              amountInStock: () => `"amountInStock" + :quantity`,
             })
             .where({ id: bookData.bookId })
             .setParameter('quantity', bookData.quantity)
