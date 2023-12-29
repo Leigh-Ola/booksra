@@ -70,7 +70,7 @@ export class Purchase {
   paymentStatus: PaymentStatusEnum;
 
   @Column({ type: 'varchar', nullable: true })
-  paymentReference: string; // jt0x37agm9
+  paymentReference: string;
   // NOTE: Remember to change paystack business name from "My Business"
 
   @Column({ type: 'varchar', nullable: true })
