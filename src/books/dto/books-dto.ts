@@ -8,6 +8,7 @@ import {
   MaxLength,
   IsEnum,
   IsUrl,
+  IsAlphanumeric,
   Max,
   Min,
   MinLength,
@@ -68,6 +69,7 @@ export class CreateBookDto {
   // category
   @IsOptional()
   @IsString()
+  @IsAlphanumeric()
   @MinLength(3)
   @MaxLength(255)
   category?: string;
@@ -139,6 +141,7 @@ export class UpdateBookDto {
   // category
   @IsOptional()
   @IsString()
+  @IsAlphanumeric()
   @MinLength(3)
   @MaxLength(255)
   category?: string;

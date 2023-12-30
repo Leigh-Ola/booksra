@@ -370,15 +370,21 @@ export class BookService {
     }
 
     if (category) {
-      queryBuilder.andWhere('category.name = :category', { category });
+      queryBuilder.andWhere('LOWER("category"."name") = :category', {
+        category: String(category).toLowerCase(),
+      });
     }
 
     if (ageRange) {
-      queryBuilder.andWhere('ageRange.name = :ageRange', { ageRange });
+      queryBuilder.andWhere('LOWER("ageRange"."name") = :ageRange', {
+        ageRange: String(ageRange).toLowerCase(),
+      });
     }
 
     if (genre) {
-      queryBuilder.andWhere('genres.name = :genre', { genre });
+      queryBuilder.andWhere('LOWER("genres"."name") = :genre', {
+        genre: String(genre).toLowerCase(),
+      });
     }
 
     if (cover) {
