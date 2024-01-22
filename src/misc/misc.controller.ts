@@ -45,13 +45,13 @@ export class MiscController {
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|heif|tiff|webp)$/i,
+          fileType: /(jpg|jpeg|png|heif|tiff|webp|bmp|tif|heic|svg)$/i,
         })
         .addMaxSizeValidator({
           // Checks if a given file's size is less than the provided value (measured in bytes)
           // max size should be 10mb
-          maxSize: 10 * 1024 * 1024,
-          message: 'Image must be less than 10mb',
+          maxSize: 20 * 1024 * 1024,
+          message: 'Image must be less than 20mb',
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
