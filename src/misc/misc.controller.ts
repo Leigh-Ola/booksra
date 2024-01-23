@@ -14,7 +14,7 @@ import {
 import { IsAdminUser } from '../users/users-guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MiscService } from './misc.service';
-import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
+import { ContactMessageDto, UpdateDataDto } from './dto/misc-dto';
 import { MessageTypesEnum } from '../utils/types';
 import { Express } from 'express';
 
@@ -25,17 +25,6 @@ export class MiscController {
   @Post('/contact-us')
   async getGenre(@Body() body: ContactMessageDto, @Ip() ip: string) {
     return this.miscService.sendEmail(ip, body);
-  }
-
-  @Post('/message')
-  @UseGuards(IsAdminUser)
-  async updateMessage(@Body() body: UpdateMessageDto) {
-    return this.miscService.updateMessage(body);
-  }
-
-  @Get('/message')
-  async getMessage(@Query('type') type: MessageTypesEnum) {
-    return this.miscService.getMessage(type);
   }
 
   @Post('/upload-image')
@@ -60,5 +49,16 @@ export class MiscController {
     file: Express.Multer.File,
   ) {
     return this.miscService.uploadImage(file);
+  }
+
+  @Post('/data')
+  @UseGuards(IsAdminUser)
+  async saveData(@Body() body: UpdateDataDto) {
+    return this.miscService.saveData(body);
+  }
+
+  @Get('/data')
+  async getData(@Query('type') type: MessageTypesEnum) {
+    return this.miscService.getData(type);
   }
 }

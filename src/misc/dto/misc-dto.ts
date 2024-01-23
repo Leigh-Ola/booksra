@@ -36,12 +36,12 @@ export class ContactMessageDto {
   message: string;
 }
 
-export class UpdateMessageDto {
+export class UpdateDataDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(1)
-  @MaxLength(10000)
-  message: string;
+  @MaxLength(1000)
+  data: string;
 
   @IsNotEmpty()
   @IsEnum(MessageTypesEnum)

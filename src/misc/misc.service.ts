@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, DataSource } from 'typeorm';
-import { ContactMessageDto, UpdateMessageDto } from './dto/misc-dto';
+import { ContactMessageDto, UpdateDataDto } from './dto/misc-dto';
 import { Email } from './email.entity';
-import { Message } from './message.entity';
+import { Data } from './data.entity';
 import { throwBadRequest } from '../utils/helpers';
 import { contactUsTemplate } from '../mail/templates/contact-us';
 import { sendMail } from '../mail/mail.service';
@@ -79,25 +79,26 @@ export class MiscService {
     return;
   }
 
-  // update message (ie., banner message)
-  async updateMessage(body: UpdateMessageDto) {
-    let message = await this.manager.findOne(Message, {
+  // update data
+  async saveData(body: UpdateDataDto) {
+    let data = await this.manager.findOne(Data, {
       where: { type: body.type },
     });
-    if (!message) {
-      message = new Message();
-      message.type = body.type;
+    if (!data) {
+      data = new Data();
+      data.type = body.type;
     }
-    message.message = body.message;
-    await this.manager.save(message);
+    data.data = body.data;
+    await this.manager.save(data);
   }
 
-  // get message (ie., banner message)
-  async getMessage(type: MessageTypesEnum) {
-    const message = await this.manager.findOne(Message, {
+  // get data
+  async getData(type: MessageTypesEnum) {
+    let data = await this.manager.findOne(Data, {
       where: { type },
     });
-    return message;
+    data && delete data.id;
+    return data;
   }
 
   private renameFileWithTimestamp(name) {
