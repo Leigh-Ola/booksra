@@ -5,7 +5,9 @@ export enum AppAccessLevelsEnum {
 }
 
 export enum MessageTypesEnum {
-  BANNER = 'banner_message',
+  BANNER_MESSAGE = 'banner_message',
+  COVER_IMAGE = 'cover_image',
+  PURCHASE_AVAILABILITY = 'purchase_availability',
 }
 
 export enum BookCoversEnum {
@@ -73,10 +75,15 @@ export enum EmailStatusEnum {
 }
 
 export enum ImageTypes {
-  IMAGE_PNG = 'image/png',
   IMAGE_JPG = 'image/jpg',
-  IMAGE_JPGEG = 'image/jpeg',
-  IMAGE_WEBP = 'image/webp',
+  IMAGE_JPEG = 'image/jpeg',
+  IMAGE_PNG = 'image/png',
   IMAGE_HEIF = 'image/heif',
   IMAGE_TIFF = 'image/tiff',
+  IMAGE_WEBP = 'image/webp',
+  IMAGE_BMP = 'image/bmp',
+  IMAGE_TIF = 'image/tif',
+  IMAGE_HEIC = 'image/heic',
+  IMAGE_SVG = 'image/svg+xml',
 }
+

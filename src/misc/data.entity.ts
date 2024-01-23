@@ -1,21 +1,20 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { MessageTypesEnum } from '../utils/types';
-import { max } from 'lodash';
 
 @Entity()
-export class Message {
+export class Data {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // type
+  // type. required
   @Column({
     type: 'enum',
     enum: MessageTypesEnum,
-    default: MessageTypesEnum.BANNER,
+    nullable: false,
   })
   type: MessageTypesEnum;
 
-  // message. required
+  // data. required
   @Column({ type: 'varchar', length: 10000, nullable: false })
-  message: string;
+  data: string;
 }
