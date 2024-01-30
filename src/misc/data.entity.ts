@@ -17,4 +17,8 @@ export class Data {
   // data. required
   @Column({ type: 'varchar', length: 10000, nullable: false })
   data: string;
+
+  // isBoolean
+  @Column({ type: 'boolean', default: false })
+  isBoolean: boolean;
 }
