@@ -13,8 +13,9 @@ import {
   Min,
   MinLength,
   Matches,
+  IsNumberString,
 } from 'class-validator';
-import { BookCoversEnum } from '../../utils/types';
+import { BookCoversEnum, SortByPriceEnum } from '../../utils/types';
 
 export class CreateBookDto {
   @IsOptional()
@@ -154,4 +155,55 @@ export class UpdateBookDto {
   })
   @MaxLength(7)
   ageRange?: string;
+}
+
+export class GetBooksDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(255)
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(30)
+  code?: string;
+
+  // genre
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  genre?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsAlphanumeric()
+  @MinLength(3)
+  @MaxLength(255)
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9]+-[0-9]+$|^[0-9]+\+$/, {
+    message: 'Age range must be in the format of 0-0 or 0+',
+  })
+  @MaxLength(7)
+  ageRange?: string;
+
+  @IsOptional()
+  @IsEnum(BookCoversEnum)
+  cover?: BookCoversEnum;
+
+  @IsOptional()
+  @IsNumberString()
+  page?: number;
+
+  @IsOptional()
+  @IsNumberString()
+  limit?: number;
+
+  @IsOptional()
+  @IsEnum(SortByPriceEnum)
+  sortByPrice?: SortByPriceEnum;
 }

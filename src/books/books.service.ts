@@ -324,7 +324,7 @@ export class BookService {
     limit = Number(limit) || 10;
     page = page < 1 ? 1 : page;
     limit = limit < 1 ? 1 : limit > 100 ? 100 : limit;
-    const queryBuilder = await this.manager
+    let queryBuilder = await this.manager
       .createQueryBuilder(Book, 'book')
       .select([
         'book.id',
@@ -339,71 +339,94 @@ export class BookService {
         'book.price',
       ])
       .leftJoinAndSelect('book.genres', 'genres')
+      .distinctOn(['book.id'])
       .leftJoinAndSelect('book.category', 'category')
       .leftJoinAndSelect('book.ageRange', 'ageRange')
       .leftJoinAndSelect('book.discount', 'discount')
-      .orderBy('book.createdAt', 'DESC') // this sorts from newest to oldest
-      .limit(limit)
-      .offset((page - 1) * limit);
+      .orderBy('book.id', 'ASC')
+      .addOrderBy('book.createdAt', 'DESC'); // this sorts from newest to oldest
 
     if (
       userRole === AppAccessLevelsEnum.ADMIN ||
       userRole === AppAccessLevelsEnum.SUPERADMIN
     ) {
-      queryBuilder.addSelect(['book.deletedAt', 'book.updatedAt']);
-      queryBuilder.withDeleted();
+      queryBuilder = queryBuilder.addSelect([
+        'book.deletedAt',
+        'book.updatedAt',
+      ]);
+      queryBuilder = queryBuilder.withDeleted();
     }
 
     if (id) {
-      queryBuilder.andWhere('book.id = :id', { id });
+      queryBuilder = queryBuilder.andWhere('book.id = :id', { id });
     }
 
     if (title) {
       if (title.length < 3) {
         return [];
       }
-      queryBuilder.andWhere('book.title ILike :title', { title: `%${title}%` });
+      queryBuilder = queryBuilder.andWhere('book.title ILike :title', {
+        title: `%${title}%`,
+      });
     }
 
     if (code) {
-      queryBuilder.andWhere('book.code = :code', { code });
+      queryBuilder = queryBuilder.andWhere('book.code = :code', { code });
     }
 
     if (category) {
-      queryBuilder.andWhere('LOWER("category"."name") = :category', {
-        category: String(category).toLowerCase(),
-      });
+      queryBuilder = queryBuilder.andWhere(
+        'LOWER("category"."name") = :category',
+        {
+          category: String(category).toLowerCase(),
+        },
+      );
     }
 
     if (ageRange) {
-      queryBuilder.andWhere('LOWER("ageRange"."name") = :ageRange', {
-        ageRange: String(ageRange).toLowerCase(),
-      });
+      queryBuilder = queryBuilder.andWhere(
+        'LOWER("ageRange"."name") = :ageRange',
+        {
+          ageRange: String(ageRange).toLowerCase(),
+        },
+      );
     }
 
     if (genre) {
-      queryBuilder.andWhere('LOWER("genres"."name") = :genre', {
+      queryBuilder = queryBuilder.andWhere('LOWER("genres"."name") = :genre', {
         genre: String(genre).toLowerCase(),
       });
     }
 
     if (cover) {
-      queryBuilder.andWhere('book.cover = :cover', { cover });
+      queryBuilder = queryBuilder.andWhere('book.cover = :cover', { cover });
     }
 
     if (sortByPrice) {
       if (sortByPrice === SortByPriceEnum.ASCENDING) {
-        queryBuilder.orderBy('book.price', 'ASC');
+        queryBuilder = queryBuilder.addOrderBy('book.price', 'ASC');
         // if discountPrice is not null, order by discountPrice
-        queryBuilder.addOrderBy('book.discountPrice', 'ASC', 'NULLS LAST');
+        queryBuilder = queryBuilder.addOrderBy(
+          'book.discountPrice',
+          'ASC',
+          'NULLS LAST',
+        );
       } else if (sortByPrice === SortByPriceEnum.DESCENDING) {
-        queryBuilder.orderBy('book.price', 'DESC');
+        queryBuilder = queryBuilder.addOrderBy('book.price', 'DESC');
         // if discountPrice is not null, order by discountPrice
-        queryBuilder.addOrderBy('book.discountPrice', 'DESC', 'NULLS LAST');
+        queryBuilder = queryBuilder.addOrderBy(
+          'book.discountPrice',
+          'DESC',
+          'NULLS LAST',
+        );
       }
     }
 
+    queryBuilder = queryBuilder.limit(limit);
+    queryBuilder = queryBuilder.offset((page - 1) * limit);
+
     const books = await queryBuilder.getMany();
+
     const response = [];
     for await (const book of books) {
       response.push({
