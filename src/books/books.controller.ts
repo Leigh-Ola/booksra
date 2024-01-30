@@ -11,7 +11,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { IsAdminUser, IsAnyone } from '../users/users-guard';
-import { CreateBookDto, UpdateBookDto } from './dto/books-dto';
+import { CreateBookDto, UpdateBookDto, GetBooksDto } from './dto/books-dto';
 import { BookCoversEnum, SortByPriceEnum } from '../utils/types';
 
 @Controller('book')
@@ -35,32 +35,21 @@ export class BookController {
   // get all matched books
   @Get()
   @UseGuards(IsAnyone)
-  async findAll(
-    @Request() req,
-    @Query('title') title: string,
-    @Query('code') code: string,
-    @Query('genre') genre: string,
-    @Query('category') category: string,
-    @Query('ageRange') ageRange: string,
-    @Query('cover') cover: BookCoversEnum,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('sortByPrice') sortByPrice?: SortByPriceEnum,
-  ) {
+  async findAll(@Request() req, @Query() query: GetBooksDto) {
     const userRole = req.user?.role;
     return this.booksService.getBooks(
       {
-        title,
-        code,
-        genre,
-        category,
-        ageRange,
-        cover,
-        sortByPrice,
+        title: query.title,
+        code: query.code,
+        genre: query.genre,
+        category: query.category,
+        ageRange: query.ageRange,
+        cover: query.cover,
+        sortByPrice: query.sortByPrice,
       },
       {
-        page,
-        limit,
+        page: query.page,
+        limit: query.limit,
       },
       {
         userRole,
