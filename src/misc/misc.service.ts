@@ -11,6 +11,7 @@ import {
   EmailTypeEnum,
   EmailStatusEnum,
   ImageTypes,
+  BooleanMessageTypesEnum,
 } from '../utils/types';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 const { AWS_KEY, AWS_SECRET, AWS_BUCKET_NAME } = process.env;
@@ -87,6 +88,22 @@ export class MiscService {
     if (!data) {
       data = new Data();
       data.type = body.type;
+    }
+    if (
+      Object.values(BooleanMessageTypesEnum).includes(
+        data.type as unknown as BooleanMessageTypesEnum,
+      )
+    ) {
+      body.data = String(body.data).toLowerCase().trim();
+      if (!['true', 'false'].includes(body.data)) {
+        throwBadRequest(
+          `Data must be either 'true' or 'false' when the data type is "${data.type}"`,
+        );
+      } else {
+        data.isBoolean = true;
+      }
+    } else {
+      data.isBoolean = false;
     }
     data.data = body.data;
     await this.manager.save(data);

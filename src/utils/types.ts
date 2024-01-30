@@ -10,6 +10,10 @@ export enum MessageTypesEnum {
   PURCHASE_AVAILABILITY = 'purchase_availability',
 }
 
+export enum BooleanMessageTypesEnum {
+  PURCHASE_AVAILABILITY = MessageTypesEnum.PURCHASE_AVAILABILITY,
+}
+
 export enum BookCoversEnum {
   HARDCOVER = 'hardcover',
   PAPERBACK = 'paperback',
