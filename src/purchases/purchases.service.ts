@@ -6,6 +6,7 @@ import {
   FeesSplit,
   EmailStatusEnum,
   EmailTypeEnum,
+  MessageTypesEnum,
 } from '../utils/types';
 import {
   CalculatePurchaseDto,
@@ -14,6 +15,7 @@ import {
 } from './dto/purchases.dto';
 import { Book } from '../books/book.entity';
 import { User } from '../users/user.entity';
+import { Data } from '../misc/data.entity';
 import { Discount } from '../discount/discount.entity';
 import { Location } from '../location/location.entity';
 import { Purchase } from '../purchases/purchase.entity';
@@ -36,6 +38,32 @@ export class PurchasesService {
   manager: EntityManager;
   constructor(private dbSource: DataSource) {
     this.manager = this.dbSource.manager;
+  }
+
+  async checkIfPurchasesAreEnabled() {
+    let dataFromDb = await this.manager.findOne(Data, {
+      where: {
+        type: MessageTypesEnum.PURCHASE_AVAILABILITY,
+        isBoolean: true,
+      },
+    });
+    if (!dataFromDb) {
+      return true;
+    }
+    const data = dataFromDb.data || null;
+    let parsed: any;
+    try {
+      parsed = JSON.parse(data);
+    } catch (error) {
+      return throwBadRequest(
+        'Unable to determine purchase availability status',
+      );
+    }
+    if (parsed === true) {
+      return true;
+    } else {
+      return throwBadRequest('Purchases are currently disabled');
+    }
   }
 
   async getAllPurchases(query: GetPurchasesDto) {
@@ -490,6 +518,7 @@ if splitPurchase for the month is 399,999.00:
 
   // create a purchase
   async createPurchase(data: NewPurchaseDto, userId: number) {
+    await this.checkIfPurchasesAreEnabled();
     // const {
     //   SUBACCOUNT_CODE,
     //   SELF_PAYMENT_MONTHLY_MAX_AMOUNT: selfPaymentMonthlyMaxAmount_,
