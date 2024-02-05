@@ -162,13 +162,7 @@ export class GetBooksDto {
   @IsString()
   @MinLength(3)
   @MaxLength(255)
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(3)
-  @MaxLength(30)
-  code?: string;
+  query?: string;
 
   // genre
   @IsOptional()
