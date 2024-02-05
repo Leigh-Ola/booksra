@@ -299,8 +299,9 @@ export class BookService {
   // function to get a book by title, code, category or age range
   async getBooks(
     {
-      title,
-      code,
+      // title,
+      // code,
+      query,
       category,
       ageRange,
       genre,
@@ -308,8 +309,9 @@ export class BookService {
       id,
       sortByPrice,
     }: {
-      title?: string;
-      code?: string;
+      // title?: string;
+      // code?: string;
+      query?: string;
       category?: string;
       ageRange?: string;
       genre?: string;
@@ -361,17 +363,14 @@ export class BookService {
       queryBuilder = queryBuilder.andWhere('book.id = :id', { id });
     }
 
-    if (title) {
-      if (title.length < 3) {
-        return [];
-      }
-      queryBuilder = queryBuilder.andWhere('book.title ILike :title', {
-        title: `%${title}%`,
-      });
-    }
-
-    if (code) {
-      queryBuilder = queryBuilder.andWhere('book.code = :code', { code });
+    if (query) {
+      queryBuilder = queryBuilder.andWhere(
+        '(book.title ILike :query OR book.code ILike :rawQuery)',
+        {
+          query: `%${query}%`,
+          rawQuery: query,
+        },
+      );
     }
 
     if (category) {
