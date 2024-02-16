@@ -39,8 +39,7 @@ export class BookController {
     const userRole = req.user?.role;
     return this.booksService.getBooks(
       {
-        title: query.title,
-        code: query.code,
+        query: query.query,
         genre: query.genre,
         category: query.category,
         ageRange: query.ageRange,
