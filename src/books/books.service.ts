@@ -339,11 +339,12 @@ export class BookService {
         'book.price',
       ])
       .leftJoinAndSelect('book.genres', 'genres')
+      .distinctOn(['book.id'])
       .leftJoinAndSelect('book.category', 'category')
       .leftJoinAndSelect('book.ageRange', 'ageRange')
       .leftJoinAndSelect('book.discount', 'discount')
-      .orderBy('book.createdAt', 'DESC') // this sorts from the most recent to the oldest
-      .addOrderBy('book.id', 'ASC');
+      .orderBy('book.id', 'ASC')
+      .addOrderBy('book.createdAt', 'DESC'); // this sorts from newest to oldest
 
     if (
       userRole === AppAccessLevelsEnum.ADMIN ||
