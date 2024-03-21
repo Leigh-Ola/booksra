@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ILike, EntityManager, DataSource } from 'typeorm';
+import { ILike, EntityManager, DataSource, Not, IsNull } from 'typeorm';
 import { Genre } from '../books/genre.entity';
 import { Category } from '../books/category.entity';
 import { AgeRange } from '../books/age-range.entity';
@@ -16,10 +16,20 @@ export class EntityService {
     return (
       (
         await this.manager.find(Genre, {
-          where: { name: ILike(`%${q}%`) },
+          where: {
+            ...(q ? { name: ILike(`%${q}%`) } : {}),
+            books: {
+              id: Not(IsNull()),
+            },
+          },
           select: ['name'],
+          relations: {
+            books: true,
+          },
         })
-      ).map((item) => item.name) || []
+      )?.map((item) => {
+        return item.name;
+      }) || []
     );
   }
 
@@ -28,10 +38,20 @@ export class EntityService {
     return (
       (
         await this.manager.find(Category, {
-          where: { name: ILike(`%${q}%`) },
+          where: {
+            ...(q ? { name: ILike(`%${q}%`) } : {}),
+            books: {
+              id: Not(IsNull()),
+            },
+          },
           select: ['name'],
+          relations: {
+            books: true,
+          },
         })
-      ).map((item) => item.name) || []
+      )?.map((item) => {
+        return item.name;
+      }) || []
     );
   }
 
@@ -40,10 +60,20 @@ export class EntityService {
     return (
       (
         await this.manager.find(AgeRange, {
-          where: { name: ILike(`%${q}%`) },
+          where: {
+            ...(q ? { name: ILike(`%${q}%`) } : {}),
+            books: {
+              id: Not(IsNull()),
+            },
+          },
           select: ['name'],
+          relations: {
+            books: true,
+          },
         })
-      )?.map((item) => item.name) || []
+      )?.map((item) => {
+        return item.name;
+      }) || []
     );
   }
 }
