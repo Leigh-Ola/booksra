@@ -43,7 +43,11 @@ export class CreateBookDto {
 
   // cover
   @IsOptional()
-  @IsEnum(BookCoversEnum)
+  @IsEnum(BookCoversEnum, {
+    message:
+      'Cover must be one of the following: ' +
+      Object.values(BookCoversEnum).join(', '),
+  })
   cover?: BookCoversEnum;
 
   // amountInStock
